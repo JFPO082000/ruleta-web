@@ -1,25 +1,28 @@
-# main.py
-import random
-from typing import List
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import random
+import os
 
 app = FastAPI()
 
-# Permitir peticiones desde cualquier origen (para que funcione en Web y App Inventor)
+# PERMITIR CUALQUIER ORIGEN (web + app inventor)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # en producción puedes limitar dominios
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Símbolos del juego (emojis)
+# SERVIR CARPETA STATIC
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Símbolos
 SYMBOLS = ["🍒", "🍋", "🍇", "🔔", "⭐", "7️⃣"]
 
-# Tabla de pagos (multiplicador de la apuesta por línea)
 PAYTABLE = {
     "🍒": 5,
     "🍋": 4,
@@ -29,56 +32,43 @@ PAYTABLE = {
     "7️⃣": 20,
 }
 
-
 class SpinRequest(BaseModel):
     bet: int
 
-
 class SpinResponse(BaseModel):
-    grid: List[List[str]]
+    grid: list
     win: int
 
+@app.get("/")
+def serve_frontend():
+    return FileResponse("static/index.html")
 
-def generate_grid() -> List[List[str]]:
-    """Genera un grid 3x3 de símbolos aleatorios."""
+def generate_grid():
     return [[random.choice(SYMBOLS) for _ in range(3)] for _ in range(3)]
 
+def calc_payout(grid, bet):
+    total = 0
 
-def calc_payout(grid: List[List[str]], bet: int) -> int:
-    """Calcula el pago total en 5 líneas: 3 horizontales + 2 diagonales."""
-    total_win = 0
-
-    # 3 líneas horizontales
+    # Líneas horizontales
     for row in grid:
         if row[0] == row[1] == row[2]:
-            symbol = row[0]
-            total_win += bet * PAYTABLE.get(symbol, 0)
+            total += bet * PAYTABLE[row[0]]
 
     # Diagonal principal
     if grid[0][0] == grid[1][1] == grid[2][2]:
-        symbol = grid[0][0]
-        total_win += bet * PAYTABLE.get(symbol, 0)
+        total += bet * PAYTABLE[grid[0][0]]
 
     # Diagonal inversa
     if grid[0][2] == grid[1][1] == grid[2][0]:
-        symbol = grid[0][2]
-        total_win += bet * PAYTABLE.get(symbol, 0)
+        total += bet * PAYTABLE[grid[0][2]]
 
-    return total_win
-
-
-@app.get("/")
-def root():
-    return {"message": "Slot API activa"}
-
+    return total
 
 @app.post("/spin", response_model=SpinResponse)
 def spin(req: SpinRequest):
-    # Seguridad mínima para evitar tonterías
-    bet = max(1, min(req.bet, 10_000))
-
+    bet = max(1, min(req.bet, 10000))
     grid = generate_grid()
     win = calc_payout(grid, bet)
-
     return SpinResponse(grid=grid, win=win)
+
 
