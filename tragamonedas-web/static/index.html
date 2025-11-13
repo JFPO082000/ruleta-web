@@ -1,52 +1,376 @@
-<!-- static/index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Ruleta Casino – Web</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <title>Royal Slots Web</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #202020;
+      --gold: #ab925c;
+      --panel: #2a2a2a;
+      --text: #ffffff;
+      --danger: #ff4c4c;
+      --success: #2ecc71;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      padding: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 8px 0 16px;
+      color: var(--gold);
+      font-size: 1.6rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #181818;
+      border: 2px solid #444;
+      margin-bottom: 12px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .cell {
+      background: #303030;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      height: 70px;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+
+    .status {
+      text-align: center;
+      min-height: 24px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .status.win {
+      color: var(--success);
+    }
+
+    .status.lose {
+      color: var(--danger);
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    label {
+      font-size: 0.9rem;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      background: #181818;
+      color: var(--text);
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: transform 0.08s ease, box-shadow 0.1s ease, background 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+      box-shadow: none;
+    }
+
+    .btn-main {
+      flex: 1;
+      background: var(--gold);
+      color: #000;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+    }
+
+    .btn-secondary {
+      background: #404040;
+      color: var(--text);
+    }
+
+    .btn-auto.on {
+      background: #3a7bd5;
+    }
+
+    .footer-info {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      text-align: center;
+      color: #ccc;
+    }
+
+    .balance {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 1rem;
+      color: var(--gold);
+    }
+
+    .bg-win {
+      background: linear-gradient(135deg, #1e5128, #191919);
+    }
+
+    .bg-lose {
+      background: linear-gradient(135deg, #512121, #191919);
+    }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <h1>Ruleta Casino – Android Web</h1>
+  <div class="app">
+    <div class="card" id="card">
+      <h1>🎰 Royal Slots Web</h1>
 
-    <canvas id="rouletteCanvas" width="380" height="380"></canvas>
-
-    <div class="panel">
-      <div class="saldo">Saldo: $<span id="balance">1000</span></div>
-
-      <div class="seccion">
-        <span class="etiqueta">Color:</span>
-        <div class="btn-row">
-          <button class="btn color" data-color="rojo"  id="btnRojo">ROJO</button>
-          <button class="btn color" data-color="negro" id="btnNegro">NEGRO</button>
-          <button class="btn color" data-color="verde" id="btnVerde">VERDE</button>
-        </div>
+      <div class="grid" id="grid">
+        <!-- 9 celdas -->
       </div>
 
-      <div class="seccion">
-        <span class="etiqueta">Apuesta:</span>
-        <div class="btn-row" id="chipsRow">
-          <!-- se llenan por JS -->
-        </div>
+      <div class="status" id="status">Pulsa SPIN para comenzar</div>
+
+      <div class="controls-row">
+        <label for="bet">💰 Apuesta:</label>
+        <input type="number" id="bet" min="1" value="10" />
+      </div>
+
+      <div class="controls-row">
+        <button class="btn-main" id="spinBtn">SPIN 🎡</button>
+        <button class="btn-secondary btn-auto" id="autoBtn">Auto-Spin OFF</button>
+      </div>
+
+      <div class="balance" id="balance">Saldo: 500</div>
+
+      <div class="footer-info">
+        5 Líneas (3 horizontales + 2 diagonales) • Backend en Python (FastAPI)
       </div>
     </div>
-
-    <div class="historial">
-      Historial: <span id="history"></span>
-    </div>
-
-    <div class="controles">
-      <button class="btn secondary" id="btnAuto">AUTO SPIN: OFF</button>
-      <button class="btn primary" id="btnSpin">🎡 GIRAR</button>
-    </div>
-
-    <div class="resultado" id="resultText">Selecciona color y apuesta…</div>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    // ==========================
+    // CONFIGURACIÓN
+    // ==========================
+    // Cuando lo subas a Render, cambia esta URL por la de tu servicio.
+    // Ejemplo: const API_URL = "https://tu-backend.onrender.com";
+    const API_URL = "http://127.0.0.1:8000";
+
+    const initialBalance = 500;
+    let balance = initialBalance;
+    let autoSpin = false;
+    let spinning = false;
+
+    const gridEl = document.getElementById("grid");
+    const statusEl = document.getElementById("status");
+    const balanceEl = document.getElementById("balance");
+    const betInput = document.getElementById("bet");
+    const spinBtn = document.getElementById("spinBtn");
+    const autoBtn = document.getElementById("autoBtn");
+    const cardEl = document.getElementById("card");
+
+    // Crear las 9 celdas del grid
+    const cells = [];
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = "❔";
+      gridEl.appendChild(cell);
+      cells.push(cell);
+    }
+
+    function setStatus(msg, type = "") {
+      statusEl.textContent = msg;
+      statusEl.className = "status";
+      if (type === "win") statusEl.classList.add("win");
+      else if (type === "lose") statusEl.classList.add("lose");
+    }
+
+    function updateBalance() {
+      balanceEl.textContent = `Saldo: ${balance}`;
+    }
+
+    function animateGridWin() {
+      cardEl.classList.remove("bg-lose");
+      cardEl.classList.add("bg-win");
+      gridEl.style.borderColor = "#ab925c";
+      gridEl.style.boxShadow = "0 0 12px rgba(171,146,92,0.7)";
+    }
+
+    function animateGridLose() {
+      cardEl.classList.remove("bg-win");
+      cardEl.classList.add("bg-lose");
+      gridEl.style.borderColor = "#444";
+      gridEl.style.boxShadow = "none";
+      setTimeout(() => {
+        cardEl.classList.remove("bg-lose");
+      }, 500);
+    }
+
+    function resetGridVisual() {
+      cardEl.classList.remove("bg-win", "bg-lose");
+      gridEl.style.borderColor = "#444";
+      gridEl.style.boxShadow = "none";
+    }
+
+    function fakeSpinAnimation() {
+      // Animación rápida antes de recibir el resultado real
+      const symbols = ["🍒", "🍋", "🍇", "🔔", "⭐", "7️⃣"];
+      cells.forEach((cell, index) => {
+        setTimeout(() => {
+          cell.style.transform = "translateY(10px)";
+          cell.style.opacity = "0.3";
+          cell.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          setTimeout(() => {
+            cell.style.transform = "translateY(0)";
+            cell.style.opacity = "1";
+          }, 80);
+        }, index * 40);
+      });
+    }
+
+    async function spinOnce() {
+      if (spinning) return;
+      const bet = parseInt(betInput.value, 10) || 0;
+      if (bet <= 0) {
+        setStatus("La apuesta debe ser mayor a 0 ⚠️", "lose");
+        return;
+      }
+      if (bet > balance) {
+        setStatus("Saldo insuficiente 💸", "lose");
+        autoSpin = false;
+        autoBtn.classList.remove("on");
+        autoBtn.textContent = "Auto-Spin OFF";
+        return;
+      }
+
+      spinning = true;
+      resetGridVisual();
+      balance -= bet;
+      updateBalance();
+      setStatus("Girando...");
+
+      fakeSpinAnimation();
+
+      try {
+        const res = await fetch(`${API_URL}/spin`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bet }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Error en la API");
+        }
+
+        const data = await res.json();
+        const { grid, win } = data;
+
+        // Mostrar el grid real
+        const flat = grid.flat();
+        cells.forEach((cell, i) => {
+          setTimeout(() => {
+            cell.style.transform = "translateY(-8px)";
+            cell.style.opacity = "0.3";
+            setTimeout(() => {
+              cell.textContent = flat[i];
+              cell.style.transform = "translateY(0)";
+              cell.style.opacity = "1";
+            }, 80);
+          }, i * 30);
+        });
+
+        if (win > 0) {
+          balance += win;
+          updateBalance();
+          setStatus(`🎉 ¡Ganaste ${win}! 🎉`, "win");
+          animateGridWin();
+        } else {
+          setStatus("Sigue intentando...", "lose");
+          animateGridLose();
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus("Error al conectar con el servidor ❌", "lose");
+      }
+
+      spinning = false;
+
+      // Auto-Spin
+      if (autoSpin && balance > 0) {
+        setTimeout(spinOnce, 1200);
+      } else if (balance <= 0) {
+        setStatus("Sin saldo. Reinicia para seguir jugando.", "lose");
+        autoSpin = false;
+        autoBtn.classList.remove("on");
+        autoBtn.textContent = "Auto-Spin OFF";
+      }
+    }
+
+    spinBtn.addEventListener("click", () => {
+      autoSpin = false;
+      autoBtn.classList.remove("on");
+      autoBtn.textContent = "Auto-Spin OFF";
+      spinOnce();
+    });
+
+    autoBtn.addEventListener("click", () => {
+      autoSpin = !autoSpin;
+      if (autoSpin) {
+        autoBtn.classList.add("on");
+        autoBtn.textContent = "Auto-Spin ON";
+        if (!spinning) spinOnce();
+      } else {
+        autoBtn.classList.remove("on");
+        autoBtn.textContent = "Auto-Spin OFF";
+      }
+    });
+
+    // Estado inicial
+    updateBalance();
+  </script>
 </body>
 </html>
-
 
