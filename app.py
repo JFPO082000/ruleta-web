@@ -5,8 +5,8 @@ from flask_cors import CORS
 import random
 import os
 
-app = Flask(__name__, static_folder="static", static_url_path="/static")
-CORS(app)  # para que funcione si sirves el front por otro dominio (opcional)
+app = Flask(__name__, static_folder="static", template_folder="templates")
+CORS(app)
 
 # --------- LÓGICA DE RULETA ---------
 NUM_WHEEL = [
@@ -30,7 +30,7 @@ def num_color(n: int) -> str:
 @app.route("/")
 def index():
     # sirve la interfaz web
-    return send_from_directory(app.static_folder, "index.html")
+    return render_template("index.html")
 
 
 @app.route("/api/spin", methods=["POST"])
@@ -80,5 +80,6 @@ if __name__ == "__main__":
     # para desarrollo local: python app.py
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
 
 
