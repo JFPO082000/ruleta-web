@@ -29,7 +29,7 @@ ballCanvas.width = ballCanvas.height = 420;
 
 const CENTER = 210;
 const R_WHEEL = 200;
-const R_BALL = 150;
+const R_BALL = 120;
 
 // ------------------------------------------
 // ESTADO DEL JUEGO
@@ -263,20 +263,22 @@ function drawWheel() {
     // --------------------------------------
     //  🎨 CONTORNO RGB ANIMADO ALREDEDOR
     // --------------------------------------
-    const now = performance.now();
-    const rgbAngle = (now / 20) % 360;
+    const time = performance.now() / 8; // velocidad de giro
+    const segments = 120;               // suavidad del anillo RGB
+    const ringRadius = R_WHEEL + 4;
+    
+    for (let i = 0; i < segments; i++) {
+        const start = (i / segments) * Math.PI * 2;
+        const end = ((i + 1) / segments) * Math.PI * 2;
 
-    function hsvToRgb(h) {
-        let f = (n, k = (n + h / 60) % 6) =>
-            255 * (1 - Math.max(Math.min(k, 4 - k, 1), 0));
-        return [f(5), f(3), f(1)];
-    }
-    const [r, g, b] = hsvToRgb(rgbAngle);
+    // crear un gradiente giratorio
+    const hue = ((i * 3 + time) % 360);  // ← giro continuo RGB
+    const color = `hsl(${hue}, 100%, 60%)`;
 
     ctx.beginPath();
-    ctx.arc(CENTER, CENTER, R_WHEEL + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = color;
     ctx.lineWidth = 4;
-    ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.arc(CENTER, CENTER, ringRadius, start, end);
     ctx.stroke();
 }
 
