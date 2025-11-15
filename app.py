@@ -1,6 +1,6 @@
 # app.py
 # Backend de Ruleta – Flask + API JSON
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, render_template
 from flask_cors import CORS
 import random
 import os
@@ -80,6 +80,7 @@ if __name__ == "__main__":
     # para desarrollo local: python app.py
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
 
 
 
