@@ -1,89 +1,149 @@
+/* Fondo general */
 body {
     margin: 0;
-    background: #033a1e;
+    background: #02361c;
     font-family: Arial, sans-serif;
+    color: #fdfdfd;
     text-align: center;
-    color: white;
 }
 
+/* Título */
 .title {
-    margin-top: 20px;
-    font-size: 34px;
-    font-weight: bold;
-    color: #e6c15f;
-    text-shadow: 2px 2px 4px black;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 30px;
+    color: #e7c359;
+    text-shadow: 2px 2px 4px #000;
+}
+
+/* Contenedor de la ruleta (dos canvas) */
+.canvas-wrapper {
+    position: relative;
+    width: 420px;
+    height: 420px;
+    margin: 0 auto;
+    transition: transform 0.5s ease-out;
+}
+
+/* Zoom cuando gana */
+.canvas-wrapper.zoomed {
+    transform: scale(1.08);
 }
 
 canvas {
-    display: block;
-    margin: 0 auto;
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    top: 0;
+    width: 420px;
+    height: 420px;
 }
 
-#rouletteCanvas {
-    top: 90px;
-}
-
-#ballCanvas {
-    top: 90px;
-    pointer-events: none;
-}
-
+/* Panel inferior */
 .panel {
-    margin-top: 520px;
+    margin: 20px auto 40px;
+    padding: 18px 16px 20px;
+    width: 90%;
+    max-width: 520px;
     background: #222;
-    border: 3px solid #e6c15f;
-    width: 80%;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 20px;
-    border-radius: 15px;
+    border-radius: 14px;
+    border: 2px solid #e7c359;
+    box-shadow: 0 0 12px rgba(0,0,0,0.7);
+    text-align: left;
+    color: #fdfdfd;
 }
 
-.bet-amounts {
-    margin-bottom: 10px;
+/* Filas */
+.row {
+    display: flex;
+    align-items: center;
+    margin: 6px 0;
+    flex-wrap: wrap;
 }
 
-.bet-btn {
-    background: #444;
-    border: 2px solid #e6c15f;
-    color: white;
-    padding: 7px 14px;
-    margin: 4px;
-    border-radius: 8px;
-    font-size: 15px;
-}
-
-.bet-btn.selected {
-    background: #e6c15f;
-    color: black;
-}
-
-.actionBtn {
-    margin-top: 15px;
-    padding: 12px 35px;
-    background: #555;
-    color: white;
-    border: none;
-    font-size: 18px;
-    border-radius: 8px;
-}
-
-.actionBtn2 {
-    margin-top: 8px;
-    padding: 10px 25px;
-    background: #555;
-    color: white;
-    border-radius: 8px;
-}
-
-.result {
-    margin-top: 18px;
-    font-size: 22px;
+/* Etiquetas */
+.label {
+    width: 80px;
     font-weight: bold;
-    color: #e6c15f;
+    color: #f2d681;
 }
+
+/* Botones de color */
+.color-btn {
+    margin-right: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #444;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+.color-btn.selected {
+    border-color: #ffd36b;
+    background: #c62828;
+}
+
+/* Fichas */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.chip-btn {
+    margin-right: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #ffd36b;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+.chip-btn.selected {
+    background: #ffd36b;
+    color: #222;
+}
+
+/* Botones principales */
+.buttons {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.action-btn {
+    margin: 4px 6px;
+    padding: 10px 26px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    background: #5c6bc0;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.action-btn.secondary {
+    background: #555;
+}
+
+/* Resultado */
+.result {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #f3c84c;
+}
+
+/* Historial */
+#history {
+    font-size: 14px;
+}
+
+/* Saldo */
+#saldo {
+    font-weight: bold;
+    color: #9be27c;
+}
+
 
