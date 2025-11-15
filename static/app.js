@@ -227,6 +227,59 @@ function spin(fromAuto) {
     requestAnimationFrame(frame);
 }
 
+
+function drawWheel() {
+    ctx.clearRect(0,0,420,420);
+    const slice = SLICE_ANGLE;
+
+    for (let i = 0; i < SLICES; i++) {
+        const start = wheelAngle + i * slice;
+        const end   = start + slice;
+        const n = NUMBERS[i];
+        const colorSector = getColor(n);
+
+        ctx.beginPath();
+        ctx.moveTo(CENTER, CENTER);
+        ctx.arc(CENTER, CENTER, R_WHEEL, start, end);
+        ctx.closePath();
+
+        if (colorSector === "rojo") ctx.fillStyle = "#d00000";
+        else if (colorSector === "negro") ctx.fillStyle = "#000";
+        else ctx.fillStyle = "#0a8a0a";
+
+        ctx.fill();
+
+        // número
+        ctx.save();
+        ctx.translate(CENTER, CENTER);
+        ctx.rotate(start + slice / 2);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(n.toString(), R_WHEEL - 35, 8);
+        ctx.restore();
+    }
+
+    // --------------------------------------
+    //  🎨 CONTORNO RGB ANIMADO ALREDEDOR
+    // --------------------------------------
+    const now = performance.now();
+    const rgbAngle = (now / 20) % 360;
+
+    function hsvToRgb(h) {
+        let f = (n, k = (n + h / 60) % 6) =>
+            255 * (1 - Math.max(Math.min(k, 4 - k, 1), 0));
+        return [f(5), f(3), f(1)];
+    }
+    const [r, g, b] = hsvToRgb(rgbAngle);
+
+    ctx.beginPath();
+    ctx.arc(CENTER, CENTER, R_WHEEL + 3, 0, Math.PI * 2);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.stroke();
+}
+
 // ------------------------------------------
 // FIN DEL GIRO: REBOTE, ZOOM, PAGO
 // ------------------------------------------
@@ -303,21 +356,3 @@ drawWheel();
 drawBall();
 actualizarResultado();
 
-// □□□ Contorno RGB animado □□□
-const now = performance.now();
-const rgbAngle = (now / 20) % 360;           // velocidad del color
-
-// convertir ángulo a RGB
-function hsvToRgb(h) {
-    let f = (n, k = (n + h / 60) % 6) =>
-        255 * (1 - Math.max(Math.min(k, 4 - k, 1), 0));
-    return [f(5), f(3), f(1)];
-}
-const [r, g, b] = hsvToRgb(rgbAngle);
-
-// dibujar borde
-ctx.beginPath();
-ctx.arc(CENTER, CENTER, R_WHEEL + 3, 0, Math.PI * 2);
-ctx.lineWidth = 4;
-ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-ctx.stroke();
