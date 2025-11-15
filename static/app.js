@@ -29,7 +29,7 @@ ballCanvas.width = ballCanvas.height = 420;
 
 const CENTER = 210;
 const R_WHEEL = 200;
-const R_BALL = 165;
+const R_BALL = 150;
 
 // ------------------------------------------
 // ESTADO DEL JUEGO
@@ -302,3 +302,22 @@ function finalizeResult() {
 drawWheel();
 drawBall();
 actualizarResultado();
+
+// □□□ Contorno RGB animado □□□
+const now = performance.now();
+const rgbAngle = (now / 20) % 360;           // velocidad del color
+
+// convertir ángulo a RGB
+function hsvToRgb(h) {
+    let f = (n, k = (n + h / 60) % 6) =>
+        255 * (1 - Math.max(Math.min(k, 4 - k, 1), 0));
+    return [f(5), f(3), f(1)];
+}
+const [r, g, b] = hsvToRgb(rgbAngle);
+
+// dibujar borde
+ctx.beginPath();
+ctx.arc(CENTER, CENTER, R_WHEEL + 3, 0, Math.PI * 2);
+ctx.lineWidth = 4;
+ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+ctx.stroke();
