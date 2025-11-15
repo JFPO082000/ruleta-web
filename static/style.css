@@ -16,19 +16,19 @@ body {
     text-shadow: 2px 2px 4px #000;
 }
 
-/* Contenedor de la ruleta (dos canvas) */
+/* Contenedor de la ruleta */
 .canvas-wrapper {
     position: relative;
     width: 420px;
     height: 420px;
     margin: 0 auto;
-    transition: transform 0.5s ease-out;
 }
 
-/* Zoom cuando gana */
+/* Eliminado: zoom por CSS  
 .canvas-wrapper.zoomed {
     transform: scale(1.08);
 }
+*/
 
 canvas {
     position: absolute;
@@ -145,5 +145,3 @@ canvas {
     font-weight: bold;
     color: #9be27c;
 }
-
-
