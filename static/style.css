@@ -25,7 +25,7 @@ body {
     transition: transform 0.5s ease-out;
 }
 
-#rgbCanvas, #rouletteCanvas, #ballCanvas {
+#rgbCanvas, #ballCanvas {
     position: absolute;
     width: 420px;
     height: 420px;
@@ -34,13 +34,31 @@ body {
 }
 
 #rgbCanvas { z-index: 1; pointer-events: none; }
+/* --- CANVAS RULETA PRO --- */
 #rouletteCanvas {
     position: absolute;
     width: 420px;
     height: 420px;
     left: 0;
     top: 0;
+
+    /* Hacerlo redondo */
+    border-radius: 50%;
+
+    /* Eliminar cualquier fondo visible */
+    background: transparent;
+
+    /* Sombra de casino */
+    box-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.4),
+        0 0 40px rgba(255, 215, 0, 0.3),
+        0 0 70px rgba(255, 215, 0, 0.1),
+        inset 0 0 25px rgba(0, 0, 0, 0.7);
+
+    /* Borde sutil dorado */
+    border: 3px solid #d4af37;
 }
+
 
 #ballCanvas { z-index: 3; }
 /* Panel inferior */
