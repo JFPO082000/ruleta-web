@@ -119,26 +119,35 @@ function drawWheel() {
     // restaurar zoom
     ctx.restore();
 
-    // ================= RGB RING ================
-    const time = performance.now() / 5;
-    const ringRadius = R_WHEEL + 6;
+ //----
+const rgbCanvas = document.getElementById("rgbCanvas");
+const rgbCtx = rgbCanvas.getContext("2d");
+rgbCanvas.width = rgbCanvas.height = 420;
+
+function drawRGB() {
+    rgbCtx.clearRect(0, 0, 420, 420);
+
     const segments = 140;
+    const time = performance.now() / 6;
+    const ringRadius = R_WHEEL + 4;
 
     for (let i = 0; i < segments; i++) {
-        const a1 = (i / segments) * Math.PI * 2;
-        const a2 = ((i + 1) / segments) * Math.PI * 2;
+        const start = (i / segments) * Math.PI * 2;
+        const end   = ((i + 1) / segments) * Math.PI * 2;
 
         const hue = (i * 4 + time) % 360;
+        rgbCtx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+        rgbCtx.lineWidth = 4;
 
-        ctx.beginPath();
-        ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
-        ctx.lineWidth = 4;
-        ctx.arc(CENTER, CENTER, ringRadius, a1, a2);
-        ctx.stroke();
+        rgbCtx.beginPath();
+        rgbCtx.arc(CENTER, CENTER, ringRadius, start, end);
+        rgbCtx.stroke();
     }
+
+    requestAnimationFrame(drawRGB);
 }
 
-// ============================================================================
+drawRGB(); // ← activa el aro RGB animado ============================================================================
 // DIBUJAR BOLA
 // ============================================================================
 
