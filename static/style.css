@@ -27,7 +27,7 @@ body {
 
 /* Zoom cuando gana */
 .canvas-wrapper.zoomed {
-    transform: scale(3.08);
+    transform: scale(1.08);
 }
 
 canvas {
