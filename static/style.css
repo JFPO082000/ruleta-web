@@ -16,7 +16,7 @@ body {
     text-shadow: 2px 2px 4px #000;
 }
 
-/* Contenedor de la ruleta */
+/* Contenedor ruleta */
 .canvas-wrapper {
     position: relative;
     width: 420px;
@@ -34,7 +34,8 @@ body {
 }
 
 #rgbCanvas { z-index: 1; pointer-events: none; }
-/* --- CANVAS RULETA PRO --- */
+
+/* Ruleta profesional */
 #rouletteCanvas {
     position: absolute;
     width: 420px;
@@ -42,26 +43,21 @@ body {
     left: 0;
     top: 0;
 
-    /* Hacerlo redondo */
     border-radius: 50%;
-
-    /* Eliminar cualquier fondo visible */
     background: transparent;
 
-    /* Sombra de casino */
     box-shadow: 
         0 0 20px rgba(255, 215, 0, 0.4),
         0 0 40px rgba(255, 215, 0, 0.3),
         0 0 70px rgba(255, 215, 0, 0.1),
         inset 0 0 25px rgba(0, 0, 0, 0.7);
 
-    /* Borde sutil dorado */
     border: 3px solid #d4af37;
 }
 
-
 #ballCanvas { z-index: 3; }
-/* Panel inferior */
+
+/* Panel */
 .panel {
     margin: 20px auto 40px;
     padding: 18px 16px 20px;
@@ -86,45 +82,77 @@ body {
 /* Etiquetas */
 .label {
     width: 80px;
+    font-size: 16px;
     font-weight: bold;
-    color: #f2d681;
+    color: #f1d28a;
 }
 
-/* Botones de color */
+/* ---- BOTONES DE COLOR PREMIUM ---- */
 .color-btn {
+    padding: 6px 18px;
     margin-right: 6px;
-    padding: 6px 14px;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background: #444;
-    color: #fff;
-    cursor: pointer;
+    border-radius: 30px;
     font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+
+    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+    border: 1px solid #555;
+    color: #eaeaea;
+
+    transition: all 0.25s ease;
+    box-shadow:
+        inset 0 0 5px rgba(255,255,255,0.05),
+        0 2px 6px rgba(0,0,0,0.5);
 }
+
+.color-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 0 8px rgba(255,255,255,0.12),
+        0 6px 12px rgba(0,0,0,0.5);
+}
+
 .color-btn.selected {
-    border-color: #ffd36b;
-    background: #c62828;
-}
-
-/* Fichas */
-.chips {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.chip-btn {
-    margin-right: 6px;
-    padding: 4px 10px;
-    border-radius: 8px;
-    border: 1px solid #ffd36b;
-    background: #333;
+    border-color: #ffcf55;
+    background: linear-gradient(145deg, #c28a00, #8b6200);
     color: #fff;
+    box-shadow:
+        inset 0 0 10px rgba(255,255,255,0.15),
+        0 4px 10px rgba(0,0,0,0.6);
+}
+
+/* ---- BOTONES DE APUESTA PREMIUM ---- */
+.chip-btn {
+    padding: 6px 12px;
+    margin-right: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
+    font-weight: bold;
+
+    background: #2f2f2f;
+    border: 1px solid #6d6d6d;
+    color: #eeeeee;
+
+    transition: all 0.25s ease;
+    box-shadow:
+        inset 0 0 5px rgba(255,255,255,0.05),
+        0 2px 6px rgba(0,0,0,0.4);
 }
+
+.chip-btn:hover {
+    transform: translateY(-2px);
+    background: #3d3d3d;
+}
+
 .chip-btn.selected {
-    background: #ffd36b;
-    color: #222;
+    background: linear-gradient(145deg, #ffd86a, #c49b2e);
+    color: #1a1a1a;
+    border: 1px solid #ffec9a;
+    box-shadow:
+        inset 0 0 10px rgba(255,255,255,0.3),
+        0 4px 8px rgba(0,0,0,0.5);
 }
 
 /* Botones principales */
@@ -167,165 +195,5 @@ body {
 #saldo {
     font-weight: bold;
     color: #9be27c;
-}
-
-/* -------------------------------------------------------
-   🎨 BOTONES PREMIUM – COLOR + APUESTAS
-   ------------------------------------------------------- */
-
-/* Contenedor limpio */
-.row .label {
-    font-size: 16px;
-    font-weight: bold;
-    color: #f1d28a;
-}
-
-/* ----- BOTONES DE COLOR (ROJO / NEGRO / VERDE) ----- */
-.color-btn {
-    padding: 6px 18px;
-    margin-right: 6px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-
-    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-    border: 1px solid #555;
-    color: #eaeaea;
-
-    transition: all 0.25s ease;
-    box-shadow:
-        inset 0 0 5px rgba(255,255,255,0.05),
-        0 2px 6px rgba(0,0,0,0.5);
-}
-
-.color-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        inset 0 0 8px rgba(255,255,255,0.12),
-        0 6px 12px rgba(0,0,0,0.5);
-}
-
-/* SELECCIONADO */
-.color-btn.selected {
-    border-color: #ffcf55;
-    background: linear-gradient(145deg, #c28a00, #8b6200);
-    color: #fff;
-    box-shadow:
-        inset 0 0 10px rgba(255,255,255,0.15),
-        0 4px 10px rgba(0,0,0,0.6);
-}
-
-/* ----- BOTONES DE APUESTA (FICHAS) ----- */
-.chip-btn {
-    padding: 6px 12px;
-    margin-right: 6px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-
-    background: #2f2f2f;
-    border: 1px solid #6d6d6d;
-    color: #eeeeee;
-
-    transition: all 0.25s ease;
-    box-shadow:
-        inset 0 0 5px rgba(255,255,255,0.05),
-        0 2px 6px rgba(0,0,0,0.4);
-}
-
-.chip-btn:hover {
-    transform: translateY(-2px);
-    background: #3d3d3d;
-}
-
-.chip-btn.selected {
-    background: linear-gradient(145deg, #ffd86a, #c49b2e);
-    color: #1a1a1a;
-    border: 1px solid #ffec9a;
-    box-shadow:
-        inset 0 0 10px rgba(255,255,255,0.3),
-        0 4px 8px rgba(0,0,0,0.5);
-}
-
-/* -------------------------------------------------------
-   🎨 BOTONES PREMIUM – COLOR + APUESTAS
-   ------------------------------------------------------- */
-
-/* Contenedor limpio */
-.row .label {
-    font-size: 16px;
-    font-weight: bold;
-    color: #f1d28a;
-}
-
-/* ----- BOTONES DE COLOR (ROJO / NEGRO / VERDE) ----- */
-.color-btn {
-    padding: 6px 18px;
-    margin-right: 6px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-
-    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-    border: 1px solid #555;
-    color: #eaeaea;
-
-    transition: all 0.25s ease;
-    box-shadow:
-        inset 0 0 5px rgba(255,255,255,0.05),
-        0 2px 6px rgba(0,0,0,0.5);
-}
-
-.color-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        inset 0 0 8px rgba(255,255,255,0.12),
-        0 6px 12px rgba(0,0,0,0.5);
-}
-
-/* SELECCIONADO */
-.color-btn.selected {
-    border-color: #ffcf55;
-    background: linear-gradient(145deg, #c28a00, #8b6200);
-    color: #fff;
-    box-shadow:
-        inset 0 0 10px rgba(255,255,255,0.15),
-        0 4px 10px rgba(0,0,0,0.6);
-}
-
-/* ----- BOTONES DE APUESTA (FICHAS) ----- */
-.chip-btn {
-    padding: 6px 12px;
-    margin-right: 6px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-
-    background: #2f2f2f;
-    border: 1px solid #6d6d6d;
-    color: #eeeeee;
-
-    transition: all 0.25s ease;
-    box-shadow:
-        inset 0 0 5px rgba(255,255,255,0.05),
-        0 2px 6px rgba(0,0,0,0.4);
-}
-
-.chip-btn:hover {
-    transform: translateY(-2px);
-    background: #3d3d3d;
-}
-
-.chip-btn.selected {
-    background: linear-gradient(145deg, #ffd86a, #c49b2e);
-    color: #1a1a1a;
-    border: 1px solid #ffec9a;
-    box-shadow:
-        inset 0 0 10px rgba(255,255,255,0.3),
-        0 4px 8px rgba(0,0,0,0.5);
 }
 
