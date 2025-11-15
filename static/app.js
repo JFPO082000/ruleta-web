@@ -69,38 +69,45 @@ const loseSound = new Audio("/static/sounds/lose.mp3");
 //  DIBUJO RULETA
 // -----------------------------------------------------------
 function drawWheel() {
-  ctx.clearRect(0, 0, 420, 420);
+    ctx.clearRect(0, 0, 460, 460);
 
-  const slice = SLICE_ANGLE;
+    const slice = SLICE_ANGLE;
 
-  for (let i = 0; i < SLICES; i++) {
-    const start = wheelAngle + i * slice;
-    const end   = start + slice;
-    const num   = NUMBERS[i];
-    const col   = getColor(num);
+    // rotación base para que el 0 quede ARRIBA
+    const rotationOffset = -Math.PI / 2;
 
-    ctx.beginPath();
-    ctx.moveTo(CENTER, CENTER);
-    ctx.arc(CENTER, CENTER, R_WHEEL, start, end);
-    ctx.closePath();
+    for (let i = 0; i < SLICES; i++) {
+        const start = wheelAngle + rotationOffset + i * slice;
+        const end = start + slice;
+        const num = NUMBERS[i];
 
-    ctx.fillStyle =
-      col === "rojo"  ? "#d00000" :
-      col === "negro" ? "#000000" :
-                        "#0a8a0a";
-    ctx.fill();
+        // sector
+        ctx.beginPath();
+        ctx.moveTo(CENTER, CENTER);
+        ctx.arc(CENTER, CENTER, R_WHEEL, start, end);
+        ctx.closePath();
 
-    // número
-    ctx.save();
-    ctx.translate(CENTER, CENTER);
-    ctx.rotate(start + slice / 2);
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 20px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(num.toString(), R_WHEEL - 35, 8);
-    ctx.restore();
-  }
+        const col = getColor(num);
+        ctx.fillStyle =
+            col === "rojo" ? "#d00000" :
+            col === "negro" ? "#000000" :
+            "#0bb400";
+        ctx.fill();
+
+        // número
+        ctx.save();
+        ctx.translate(CENTER, CENTER);
+        ctx.rotate(start + slice / 2);
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 22px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(num.toString(), R_WHEEL - 40, 8);
+
+        ctx.restore();
+    }
 }
+
 
 // -----------------------------------------------------------
 //  DIBUJO BOLA
@@ -267,42 +274,37 @@ function animateSpin() {
 
     try { spinSound.currentTime = 0; spinSound.play(); } catch (e) {}
 
-    const target = winnerIndex * SLICE_ANGLE + SLICE_ANGLE / 2;
+    // velocidades iniciales reales de casino
+    let wheelSpeed = 0.25;
+    let ballSpeed = -0.75;  // bola va al revés siempre
 
-    // velocidades iniciales
-    let wheelSpeed = 0.22;      // velocidad inicial ruleta
-    let ballSpeed = 0.55;       // velocidad más rápida de la bola
-    let frictionWheel = 0.992;  // freno gradual ruleta
-    let frictionBall = 0.985;   // freno gradual bola
+    // fricción física
+    const frictionWheel = 0.992;
+    const frictionBall = 0.985;
 
     spinning = true;
 
     function frame() {
-
-        // aplicar velocidades
         wheelAngle += wheelSpeed;
         ballAngle += ballSpeed;
 
-        // desaceleración
         wheelSpeed *= frictionWheel;
         ballSpeed *= frictionBall;
 
         drawWheel();
         drawBall();
 
-        // cuando la bola está suficientemente lenta → detener en el número ganador
-        if (ballSpeed < 0.015) {
+        // cuando la bola ya va lenta, calcular caída al número
+        if (Math.abs(ballSpeed) < 0.020) {
 
-            // mover suavemente a la posición ganadora exacta
-            const finalAngle = wheelAngle + target;
-            const diff = ((finalAngle - ballAngle) % (Math.PI * 2));
+            const target = (winnerIndex * SLICE_ANGLE) - Math.PI / 2;
 
-            if (Math.abs(diff) < 0.02) {
-                ballAngle = finalAngle;
+            const diff = ((target - ballAngle) % (Math.PI * 2));
 
-                // rebote realista
-                bounceBall(finalAngle);
-
+            // ajustar suavemente
+            if (Math.abs(diff) < 0.03) {
+                ballAngle = target;
+                bounceBall(target);
                 return;
             }
 
@@ -317,29 +319,33 @@ function animateSpin() {
 
 // rebote final
 function bounceBall(angle) {
-    const amplitude = 0.06;
-    const bounces = 8;
-    const duration = 550;
+    const amplitude = 0.05;
+    const bounces = 10;
+    const duration = 750;
     const start = performance.now();
 
     function bounce(now) {
         let t = (now - start) / duration;
         if (t > 1) t = 1;
 
-        const damp = 1 - t;
-        const offset = Math.sin(t * bounces * Math.PI) * amplitude * damp;
+        const decay = 1 - t;
+        const offset = Math.sin(t * bounces * Math.PI) * amplitude * decay;
 
         ballAngle = angle + offset;
 
         drawWheel();
         drawBall();
 
-        if (t < 1) requestAnimationFrame(bounce);
-        else showResult();
+        if (t < 1) {
+            requestAnimationFrame(bounce);
+        } else {
+            showResult();
+        }
     }
 
     requestAnimationFrame(bounce);
 }
+
 
 
 // -----------------------------------------------------------
