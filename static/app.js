@@ -1,171 +1,144 @@
-// =============================
-// CONFIGURACIÓN Y VARIABLES
-// =============================
+//--------------------------------------------------
+// CONFIGURACIÓN DE RULETA EUROPEA REAL
+//--------------------------------------------------
+const NUMBERS = [
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27,
+    13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1,
+    20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+];
+
+// Colores reales de ruleta europea
+function getColor(num) {
+    if (num === 0) return "verde";
+    const rojos = [32,19,21,25,34,27,36,30,23,5,16,1,14,9,18,7,12,3];
+    return rojos.includes(num) ? "rojo" : "negro";
+}
+
+//--------------------------------------------------
+// CANVAS SETUP
+//--------------------------------------------------
 const canvas = document.getElementById("ruleta");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 600;
-canvas.height = 600;
-
-let wheelAngle = 0;
-let ballAngle = 0;
+const CENTER = canvas.width / 2;
+const R = CENTER - 10;
+let angle = 0;
+let speed = 0;
 let spinning = false;
-let targetNumber = null;
-let autoSpin = false;
 
-const WHEEL_NUMBERS = [
-    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6,
-    27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16,
-    33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
-];
-
-const SEGMENT_ANGLE = 360 / WHEEL_NUMBERS.length;
-
-// UI ELEMENTOS
-const resultText = document.getElementById("resultado");
-const historyText = document.getElementById("historial");
-const saldoText = document.getElementById("saldo");
-const autoBtn = document.getElementById("auto");
-
-// =============================
-// FUNCIONES DE UTILIDAD
-// =============================
-
-function angleToNumber(angle) {
-    const deg = (angle % 360 + 360) % 360;
-    const index = Math.floor(deg / SEGMENT_ANGLE);
-    return WHEEL_NUMBERS[index];
-}
-
-// Easing para giro suave
-function easeOut(t) {
-    return 1 - Math.pow(1 - t, 3);
-}
-
-// =============================
-// DIBUJAR RULETA
-// =============================
+//--------------------------------------------------
+// DIBUJO DE RULETA
+//--------------------------------------------------
 function drawWheel() {
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const r = 260;
+    const slice = (2 * Math.PI) / NUMBERS.length;
 
-    // Fondo
-    ctx.fillStyle = "#004d26";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Ruleta
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate((wheelAngle * Math.PI) / 180);
+    // Slices
+    for (let i=0; i<NUMBERS.length; i++) {
+        const start = angle + i * slice;
+        const end   = start + slice;
 
-    // Sectores
-    for (let i = 0; i < WHEEL_NUMBERS.length; i++) {
+        const n = NUMBERS[i];
+        let colorSector = getColor(n);
+        ctx.fillStyle = (colorSector === "rojo") ? "#d40000"
+                     : (colorSector === "negro") ? "#000"
+                     : "#0a8a0a";
+
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.arc(0, 0, r, (i * SEGMENT_ANGLE) * Math.PI / 180, ((i + 1) * SEGMENT_ANGLE) * Math.PI / 180);
-        ctx.fillStyle = (WHEEL_NUMBERS[i] === 0) ? "#0a0" : (i % 2 === 0 ? "#d00" : "#000");
+        ctx.moveTo(CENTER, CENTER);
+        ctx.arc(CENTER, CENTER, R, start, end);
+        ctx.closePath();
         ctx.fill();
 
-        // Texto número
+        // Texto
         ctx.save();
-        ctx.rotate(((i + 0.5) * SEGMENT_ANGLE) * Math.PI / 180);
-        ctx.fillStyle = "#fff";
-        ctx.font = "22px Arial";
+        ctx.fillStyle = "white";
+        ctx.translate(CENTER, CENTER);
+        ctx.rotate(start + slice / 2);
+        ctx.font = "bold 22px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(WHEEL_NUMBERS[i], r - 35, 8);
+        ctx.fillText(n.toString(), R - 35, 8);
         ctx.restore();
     }
 
-    ctx.restore();
+    // bola
+    let ballAngle = angle + 0.1;
+    let bx = CENTER + Math.cos(ballAngle) * (R - 70);
+    let by = CENTER + Math.sin(ballAngle) * (R - 70);
 
-    drawBall();
-}
-
-// =============================
-// DIBUJAR BOLA
-// =============================
-function drawBall() {
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-
-    const rBall = 190; // MÁS ADENTRO PARA NO TAPAR EL DISEÑO
-    const angleRad = (ballAngle * Math.PI) / 180;
-
-    const x = cx + rBall * Math.cos(angleRad);
-    const y = cy + rBall * Math.sin(angleRad);
-
+    ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.fillStyle = "#fff";
-    ctx.arc(x, y, 12, 0, Math.PI * 2);
+    ctx.arc(bx, by, 12, 0, Math.PI * 2);
     ctx.fill();
 }
 
-// =============================
-// ANIMACIÓN DEL GIRO
-// =============================
-async function spin() {
-    if (spinning) return;
-    spinning = true;
+//--------------------------------------------------
+// ANIMACIÓN
+//--------------------------------------------------
+function animate() {
+    if (spinning) {
+        angle += speed;
+        speed *= 0.985;
 
-    resultText.innerText = "Girando…";
-
-    // 1. Pedir número al backend
-    const res = await fetch("/api/spin");
-    const data = await res.json();
-    targetNumber = data.resultado;
-
-    // 2. Calcular ángulo objetivo exacto
-    const targetIndex = WHEEL_NUMBERS.indexOf(targetNumber);
-    const targetAngle = targetIndex * SEGMENT_ANGLE;
-
-    const startWheel = wheelAngle;
-    const startBall = wheelAngle + 720; // bola gira contrario
-
-    const extraTurns = 4 * 360;
-    const totalWheelRotate = extraTurns + (360 - targetAngle);
-
-    const duration = 3000;
-    const startTime = performance.now();
-
-    function animate(time) {
-        let t = (time - startTime) / duration;
-        if (t > 1) t = 1;
-
-        let eased = easeOut(t);
-
-        wheelAngle = startWheel + totalWheelRotate * eased;
-        ballAngle = startBall - totalWheelRotate * 1.2 * eased;
-
-        drawWheel();
-
-        if (t < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            finishSpin(targetNumber);
+        if (speed < 0.002) {
+            spinning = false;
+            showResult();
         }
     }
 
+    drawWheel();
     requestAnimationFrame(animate);
 }
+animate();
 
-// =============================
-// AL TERMINAR EL GIRO
-// =============================
-function finishSpin(num) {
-    spinning = false;
+//--------------------------------------------------
+// INICIAR GIRO
+//--------------------------------------------------
+function spin() {
+    if (spinning) return;
 
-    resultText.innerText = `Salió ${num}`;
+    speed = 0.25 + Math.random() * 0.25;
+    spinning = true;
 
-    historyText.innerText += " " + num;
+    document.getElementById("resultado").innerText = "Girando…";
 }
 
-// =============================
+//--------------------------------------------------
+// CALCULAR RESULTADO
+//--------------------------------------------------
+function showResult() {
+    const slice = (2 * Math.PI) / NUMBERS.length;
+
+    let a = (angle % (Math.PI * 2) + (Math.PI * 2)) % (Math.PI * 2);
+    let index = Math.floor(NUMBERS.length - (a / slice)) % NUMBERS.length;
+
+    const num = NUMBERS[index];
+    const color = getColor(num);
+
+    document.getElementById("resultado").innerText =
+        `Salió ${num} (${color.toUpperCase()})`;
+
+    updateHistory(num);
+}
+
+//--------------------------------------------------
+// HISTORIAL
+//--------------------------------------------------
+function updateHistory(n) {
+    const h = document.getElementById("historial");
+    h.innerText = n + "  " + h.innerText;
+}
+
+//--------------------------------------------------
 // AUTO SPIN
-// =============================
-autoBtn.onclick = () => {
+//--------------------------------------------------
+let autoSpin = false;
+
+document.getElementById("auto").onclick = () => {
     autoSpin = !autoSpin;
-    autoBtn.innerText = autoSpin ? "AUTO SPIN: ON" : "AUTO SPIN: OFF";
+    document.getElementById("auto").innerText =
+        autoSpin ? "AUTO SPIN: ON" : "AUTO SPIN: OFF";
 
     if (autoSpin) autoLoop();
 };
@@ -173,11 +146,5 @@ autoBtn.onclick = () => {
 function autoLoop() {
     if (!autoSpin) return;
     spin();
-    setTimeout(autoLoop, 4000);
+    setTimeout(autoLoop, 3500);
 }
-
-// =============================
-// INICIAR
-// =============================
-drawWheel();
-
