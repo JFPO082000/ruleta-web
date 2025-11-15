@@ -34,7 +34,14 @@ body {
 }
 
 #rgbCanvas { z-index: 1; pointer-events: none; }
-#rouletteCanvas { z-index: 2; }
+#rouletteCanvas {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    left: 0;
+    top: 0;
+}
+
 #ballCanvas { z-index: 3; }
 /* Panel inferior */
 .panel {
