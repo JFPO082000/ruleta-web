@@ -283,7 +283,7 @@ function finishSpin() {
     const duration = 600;
     const start = performance.now();
 
-    function frame(now){
+    function bounceFrame(now){
         let t = (now - start) / duration;
         if (t > 1) t = 1;
 
@@ -295,15 +295,21 @@ function finishSpin() {
         drawWheel();
         drawBall();
 
-        if (t < 1) requestAnimationFrame(frame);
-        else showResult();
+        if (t < 1) {
+            requestAnimationFrame(bounceFrame);
+        } else {
+            showResult();
+        }
     }
 
+    // ANIMACIÓN DE ZOOM
     canvasWrapper.classList.add("zoomed");
     setTimeout(() => canvasWrapper.classList.remove("zoomed"), 800);
 
-    requestAnimationFrame(frame);
+    // 🔥 ESTA ES LA LÍNEA CRÍTICA QUE FALTABA 🔥
+    requestAnimationFrame(bounceFrame);
 }
+
 
 // -----------------------------------------------------------
 // MOSTRAR RESULTADO FINAL
