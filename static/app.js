@@ -1,168 +1,137 @@
-//--------------------------------------------------
-// CONFIGURACIÓN DE RULETA EUROPEA REAL
-//--------------------------------------------------
+const rouletteCanvas = document.getElementById("rouletteCanvas");
+const ballCanvas = document.getElementById("ballCanvas");
+const ctx = rouletteCanvas.getContext("2d");
+const ballCtx = ballCanvas.getContext("2d");
+
+rouletteCanvas.width = 420;
+rouletteCanvas.height = 420;
+ballCanvas.width = 420;
+ballCanvas.height = 420;
+
 const NUMBERS = [
-    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27,
-    13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1,
-    20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6,
+    27, 13, 36, 11, 30, 8, 23, 10, 5, 24,
+    16, 33, 1, 20, 14, 31, 9, 22, 18, 29,
+    7, 28, 12, 35, 3, 26
 ];
 
-// Colores reales de ruleta europea
-function getColor(num) {
-    if (num === 0) return "verde";
-    const rojos = [32,19,21,25,34,27,36,30,23,5,16,1,14,9,18,7,12,3];
-    return rojos.includes(num) ? "rojo" : "negro";
-}
-
-//--------------------------------------------------
-// CANVAS SETUP
-//--------------------------------------------------
-const canvas = document.getElementById("ruleta");
-const ctx = canvas.getContext("2d");
-
-const CENTER = canvas.width / 2;
-const R = CENTER - 10;
 let angle = 0;
-let speed = 0;
 let spinning = false;
-
-//--------------------------------------------------
-// DIBUJO DE RULETA
-//--------------------------------------------------
-function drawWheel() {
-    const slice = (2 * Math.PI) / NUMBERS.length;
-
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    // Slices
-    for (let i=0; i<NUMBERS.length; i++) {
-        const start = angle + i * slice;
-        const end   = start + slice;
-
-        const n = NUMBERS[i];
-        let colorSector = getColor(n);
-        ctx.fillStyle = (colorSector === "rojo") ? "#d40000"
-                     : (colorSector === "negro") ? "#000"
-                     : "#0a8a0a";
-
-        ctx.beginPath();
-        ctx.moveTo(CENTER, CENTER);
-        ctx.arc(CENTER, CENTER, R, start, end);
-        ctx.closePath();
-        ctx.fill();
-
-        // Texto
-        ctx.save();
-        ctx.fillStyle = "white";
-        ctx.translate(CENTER, CENTER);
-        ctx.rotate(start + slice / 2);
-        ctx.font = "bold 22px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(n.toString(), R - 35, 8);
-        ctx.restore();
-    }
-
-    // bola
-    let ballAngle = angle + 0.1;
-    let bx = CENTER + Math.cos(ballAngle) * (R - 70);
-    let by = CENTER + Math.sin(ballAngle) * (R - 70);
-
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.arc(bx, by, 12, 0, Math.PI * 2);
-    ctx.fill();
-}
-
-//--------------------------------------------------
-// ANIMACIÓN
-//--------------------------------------------------
-function animate() {
-    if (spinning) {
-        angle += speed;
-        speed *= 0.985;
-
-        if (speed < 0.002) {
-            spinning = false;
-            showResult();
-        }
-    }
-
-    drawWheel();
-    requestAnimationFrame(animate);
-}
-animate();
-
-//--------------------------------------------------
-// INICIAR GIRO
-//--------------------------------------------------
-function spin() {
-    if (spinning) return;
-
-    speed = 0.25 + Math.random() * 0.25;
-    spinning = true;
-
-    document.getElementById("resultado").innerText = "Girando…";
-}
-
-//--------------------------------------------------
-// CALCULAR RESULTADO
-//--------------------------------------------------
-function showResult() {
-    const slice = (2 * Math.PI) / NUMBERS.length;
-
-    let a = (angle % (Math.PI * 2) + (Math.PI * 2)) % (Math.PI * 2);
-    let index = Math.floor(NUMBERS.length - (a / slice)) % NUMBERS.length;
-
-    const num = NUMBERS[index];
-    const color = getColor(num);
-
-    document.getElementById("resultado").innerText =
-        `Salió ${num} (${color.toUpperCase()})`;
-
-    updateHistory(num);
-}
-
-//--------------------------------------------------
-// HISTORIAL
-//--------------------------------------------------
-function updateHistory(n) {
-    const h = document.getElementById("historial");
-    h.innerText = n + "  " + h.innerText;
-}
-
-//--------------------------------------------------
-// AUTO SPIN
-//--------------------------------------------------
+let selectedBet = null;
 let autoSpin = false;
 
-document.getElementById("auto").onclick = () => {
-    autoSpin = !autoSpin;
-    document.getElementById("auto").innerText =
-        autoSpin ? "AUTO SPIN: ON" : "AUTO SPIN: OFF";
-
-    if (autoSpin) autoLoop();
-};
-
-function autoLoop() {
-    if (!autoSpin) return;
-    spin();
-
-    let apuesta = 10;
-document.querySelectorAll(".chip").forEach(btn=>{
-    btn.onclick = ()=>{
-        apuesta = Number(btn.dataset.value);
-        updateBetUI();
-    };
+// ----------------- BOTONES -------------------
+document.querySelectorAll(".bet-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".bet-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedBet = parseInt(btn.dataset.value);
+    });
 });
 
-function updateBetUI() {
-    document.querySelectorAll(".chip").forEach(btn=>{
-        btn.style.background = (Number(btn.dataset.value) === apuesta)
-            ? "#ffd37a"
-            : "#333";
-    });
-}
-updateBetUI();
+document.getElementById("autoBtn").addEventListener("click", () => {
+    autoSpin = !autoSpin;
+    document.getElementById("autoBtn").textContent = autoSpin ? "AUTO SPIN: ON" : "AUTO SPIN: OFF";
+    if (autoSpin && !spinning) startSpin();
+});
 
-    setTimeout(autoLoop, 3500);
+document.getElementById("spinBtn").addEventListener("click", startSpin);
+
+// ----------------- FUNCIONES -------------------
+function drawRoulette() {
+    const cx = 210, cy = 210, r = 200;
+    const slice = (Math.PI * 2) / 37;
+
+    ctx.clearRect(0, 0, 420, 420);
+
+    for (let i = 0; i < NUMBERS.length; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, angle + i * slice, angle + (i + 1) * slice);
+        ctx.fillStyle = NUMBERS[i] === 0 ? "#0f0" : (i % 2 === 0 ? "red" : "black");
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle + (i + 0.5) * slice);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.fillText(NUMBERS[i], r - 35, 8);
+        ctx.restore();
+    }
 }
+
+let ballAngle = 0;
+let ballSpeed = 0.32;
+
+function drawBall() {
+    const cx = 210, cy = 210;
+    const r = 165;
+
+    ballCtx.clearRect(0, 0, 420, 420);
+
+    const bx = cx + Math.cos(ballAngle) * r;
+    const by = cy + Math.sin(ballAngle) * r;
+
+    ballCtx.beginPath();
+    ballCtx.arc(bx, by, 12, 0, Math.PI * 2);
+    ballCtx.fillStyle = "white";
+    ballCtx.fill();
+}
+
+function startSpin() {
+    if (spinning) return;
+    if (!selectedBet) {
+        alert("Selecciona una apuesta primero.");
+        return;
+    }
+
+    spinning = true;
+    ballSpeed = 0.32;
+    angleSpeed = 0.12;
+
+    spinAnimation();
+}
+
+let angleSpeed = 0.12;
+
+function spinAnimation() {
+    if (!spinning) return;
+
+    angle += angleSpeed;
+    ballAngle -= ballSpeed;
+
+    angleSpeed *= 0.992;
+    ballSpeed *= 0.985;
+
+    drawRoulette();
+    drawBall();
+
+    if (angleSpeed < 0.002) {
+        spinning = false;
+        finishSpin();
+        return;
+    }
+
+    requestAnimationFrame(spinAnimation);
+}
+
+function finishSpin() {
+    const slice = (Math.PI * 2) / 37;
+
+    let finalAngle = (ballAngle - angle) % (Math.PI * 2);
+    if (finalAngle < 0) finalAngle += Math.PI * 2;
+
+    const index = Math.floor(finalAngle / slice);
+    const number = NUMBERS[index];
+
+    // Mostrar resultado solo después de detenerse
+    document.getElementById("result").textContent = `Salió ${number}`;
+    document.getElementById("history").textContent += " " + number;
+
+    if (autoSpin) startSpin();
+}
+
+drawRoulette();
+drawBall();
