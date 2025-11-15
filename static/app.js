@@ -264,55 +264,83 @@ function spin(fromAuto) {
 //  ANIMACIÓN DEL GIRO (ruleta + bola sincronizadas)
 // -----------------------------------------------------------
 function animateSpin() {
-  try { spinSound.currentTime = 0; spinSound.play(); } catch (e) {}
 
-  // Ángulo relativo del sector ganador (mitad del slice)
-  const targetRel = winnerIndex * SLICE_ANGLE + SLICE_ANGLE / 2;
+    try { spinSound.currentTime = 0; spinSound.play(); } catch (e) {}
 
-  const startWheel = wheelAngle;
-  const startBall  = ballAngle;
+    const target = winnerIndex * SLICE_ANGLE + SLICE_ANGLE / 2;
 
-  const extraWheelTurns = 3 * 2 * Math.PI; // 3 vueltas ruleta
-  const extraBallTurns  = 6 * 2 * Math.PI; // 6 vueltas bola (más rápida)
+    // velocidades iniciales
+    let wheelSpeed = 0.22;      // velocidad inicial ruleta
+    let ballSpeed = 0.55;       // velocidad más rápida de la bola
+    let frictionWheel = 0.992;  // freno gradual ruleta
+    let frictionBall = 0.985;   // freno gradual bola
 
-  const duration = 3400; // ms
-  const start    = performance.now();
+    spinning = true;
 
-  function easeOut(t) {
-    return 1 - Math.pow(1 - t, 3);
-  }
+    function frame() {
 
-  function frame(now) {
-    let t = (now - start) / duration;
-    if (t > 1) t = 1;
-    const e = easeOut(t);
+        // aplicar velocidades
+        wheelAngle += wheelSpeed;
+        ballAngle += ballSpeed;
 
-    // Ruleta gira varias vueltas
-    wheelAngle = startWheel + extraWheelTurns * e;
+        // desaceleración
+        wheelSpeed *= frictionWheel;
+        ballSpeed *= frictionBall;
 
-    // Bola gira muchas vueltas y al final la corregimos al sector ganador
-    const ballTravel = extraBallTurns * e;
-    ballAngle = startBall + ballTravel;
+        drawWheel();
+        drawBall();
 
-    drawWheel();
-    drawBall();
+        // cuando la bola está suficientemente lenta → detener en el número ganador
+        if (ballSpeed < 0.015) {
 
-    if (t < 1) {
-      requestAnimationFrame(frame);
-    } else {
-      // FORZAMOS posición final EXACTA: bola sobre número ganador
-      wheelAngle = startWheel + extraWheelTurns;
-      ballAngle  = wheelAngle + targetRel;
+            // mover suavemente a la posición ganadora exacta
+            const finalAngle = wheelAngle + target;
+            const diff = ((finalAngle - ballAngle) % (Math.PI * 2));
 
-      drawWheel();
-      drawBall();
+            if (Math.abs(diff) < 0.02) {
+                ballAngle = finalAngle;
 
-      finishSpin(targetRel);
+                // rebote realista
+                bounceBall(finalAngle);
+
+                return;
+            }
+
+            ballAngle += diff * 0.08;
+        }
+
+        requestAnimationFrame(frame);
     }
-  }
 
-  requestAnimationFrame(frame);
+    requestAnimationFrame(frame);
 }
+
+// rebote final
+function bounceBall(angle) {
+    const amplitude = 0.06;
+    const bounces = 8;
+    const duration = 550;
+    const start = performance.now();
+
+    function bounce(now) {
+        let t = (now - start) / duration;
+        if (t > 1) t = 1;
+
+        const damp = 1 - t;
+        const offset = Math.sin(t * bounces * Math.PI) * amplitude * damp;
+
+        ballAngle = angle + offset;
+
+        drawWheel();
+        drawBall();
+
+        if (t < 1) requestAnimationFrame(bounce);
+        else showResult();
+    }
+
+    requestAnimationFrame(bounce);
+}
+
 
 // -----------------------------------------------------------
 //  FINAL DEL GIRO: rebote + zoom + resultado
