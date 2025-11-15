@@ -38,6 +38,34 @@ canvas {
     height: 420px;
 }
 
+#rgbCanvas {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#rouletteCanvas {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    left: 0;
+    top: 0;
+    z-index: 2;
+}
+
+#ballCanvas {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    left: 0;
+    top: 0;
+    z-index: 3;
+}
+
 /* Panel inferior */
 .panel {
     margin: 20px auto 40px;
