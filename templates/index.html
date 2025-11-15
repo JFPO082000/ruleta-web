@@ -2,51 +2,43 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ruleta Casino – Web</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- estilos -->
+    <title>Ruleta Casino – Web</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-
 <body>
 
-<div id="app">
-    <h1>Ruleta Casino – Web</h1>
+<h1 class="title">Ruleta Casino – Web</h1>
 
-    <!-- Canvas que SI coincide con app.js -->
-    <canvas id="ruleta" width="600" height="600"></canvas>
+<canvas id="rouletteCanvas"></canvas>
+<canvas id="ballCanvas"></canvas>
 
-    <div class="panel">
-
-    <div class="apuestas">
-        <button class="chip" data-value="1">1</button>
-        <button class="chip" data-value="5">5</button>
-        <button class="chip" data-value="10">10</button>
-        <button class="chip" data-value="50">50</button>
-        <button class="chip" data-value="100">100</button>
+<div class="panel">
+    
+    <div class="bet-amounts">
+        <button class="bet-btn" data-value="1">1</button>
+        <button class="bet-btn" data-value="5">5</button>
+        <button class="bet-btn" data-value="10">10</button>
+        <button class="bet-btn" data-value="50">50</button>
+        <button class="bet-btn" data-value="100">100</button>
     </div>
 
-        <div class="saldo">Saldo: $<span id="saldo">1000</span></div>
+    <div class="status">Saldo: <span id="saldo">$1000</span></div>
 
-        <div class="seccion">
-            <span class="etiqueta">Historial:</span>
-            <div class="resultado" id="historial"></div>
-        </div>
-
-        <div class="controles">
-            <button class="btn" id="btnSpin" onclick="spin()">🎡 GIRAR</button>
-            <button class="btn" id="auto">AUTO SPIN: OFF</button>
-        </div>
-
-        <div class="resultado" id="resultado">Listo para girar…</div>
+    <div class="history">
+        Historial: <span id="history"></span>
     </div>
+
+    <button id="spinBtn" class="actionBtn">🎰 GIRAR</button>
+    <button id="autoBtn" class="actionBtn2">AUTO SPIN: OFF</button>
+
+    <div id="result" class="result"></div>
 
 </div>
 
 <script src="/static/app.js"></script>
-
 </body>
 </html>
+
 
 
