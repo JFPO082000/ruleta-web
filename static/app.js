@@ -146,5 +146,23 @@ document.getElementById("auto").onclick = () => {
 function autoLoop() {
     if (!autoSpin) return;
     spin();
+
+    let apuesta = 10;
+document.querySelectorAll(".chip").forEach(btn=>{
+    btn.onclick = ()=>{
+        apuesta = Number(btn.dataset.value);
+        updateBetUI();
+    };
+});
+
+function updateBetUI() {
+    document.querySelectorAll(".chip").forEach(btn=>{
+        btn.style.background = (Number(btn.dataset.value) === apuesta)
+            ? "#ffd37a"
+            : "#333";
+    });
+}
+updateBetUI();
+
     setTimeout(autoLoop, 3500);
 }
