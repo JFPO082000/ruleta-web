@@ -10,6 +10,16 @@ const CENTER = 230;
 const R_WHEEL = 215;
 const R_BALL  = 150;
 
+rouletteCanvas.width  = 460;
+rouletteCanvas.height = 460;
+
+ballCanvas.width  = 460;
+ballCanvas.height = 460;
+
+rgbCanvas.width  = 460;
+rgbCanvas.height = 460;
+
+
 // Física realista
 const INITIAL_WHEEL_SPEED = 0.25;   // horario
 const INITIAL_BALL_SPEED  = -0.78;  // antihorario
