@@ -54,11 +54,11 @@ def api_spin():
 
     new_balance = balance - bet + win
 
-    return jsonify({
-        "wheel": WHEEL_ORDER,  # → el frontend dibuja EXACTO el orden real
-        "index": idx,          # → sector ganador
-        "number": number,      # → número ganador
-        "color": result_color, # → color ganador
+   return jsonify({
+        "wheel": NUM_WHEEL,   # → orden correcto de la ruleta
+        "index": idx,
+        "number": number,
+        "color": result_color,
         "win": win,
         "newBalance": balance
     })
