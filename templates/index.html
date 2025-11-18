@@ -9,66 +9,47 @@
 
     <h1 class="title">Ruleta Casino – Web</h1>
 
-    <!-- 🎡 CONTENEDOR DE TODA LA RULETA (3 CANVAS) -->
+    <!-- 🔵 CONTENEDOR CANVAS -->
     <div id="canvasWrapper" class="canvas-wrapper">
-        <canvas id="rgbCanvas"></canvas>
-        <canvas id="rouletteCanvas"></canvas>
-        <canvas id="ballCanvas"></canvas>
+        <canvas id="rgbCanvas" width="420" height="420"></canvas>
+        <canvas id="rouletteCanvas" width="420" height="420"></canvas>
+        <canvas id="ballCanvas" width="420" height="420"></canvas>
     </div>
 
-    <!-- 🟦 PANEL INFERIOR -->
+    <!-- ⚫ PANEL INFERIOR -->
     <div class="panel">
 
-        <!-- Color -->
         <div class="row">
             <span class="label">Color:</span>
-            <button class="color-btn" data-color="rojo">ROJO</button>
-            <button class="color-btn" data-color="negro">NEGRO</button>
-            <button class="color-btn" data-color="verde">VERDE</button>
+            <button id="btnRojo" class="color-btn" data-color="rojo">ROJO</button>
+            <button id="btnNegro" class="color-btn" data-color="negro">NEGRO</button>
+            <button id="btnVerde" class="color-btn" data-color="verde">VERDE</button>
         </div>
 
-        <!-- Apuesta -->
         <div class="row">
             <span class="label">Apuesta:</span>
-            <div id="chipsRow" class="chips">
-                <button class="chip-btn" data-value="10">$10</button>
-                <button class="chip-btn" data-value="20">$20</button>
-                <button class="chip-btn" data-value="50">$50</button>
-                <button class="chip-btn" data-value="100">$100</button>
-                <button class="chip-btn" data-value="200">$200</button>
-                <button class="chip-btn" data-value="500">$500</button>
-            </div>
+            <div id="chipsRow" class="chips"></div>
         </div>
 
-        <!-- Saldo -->
         <div class="row">
             <span class="label">Saldo:</span>
-            <span id="saldo">$1000</span>
+            <span id="balance">$1000</span>
         </div>
 
-        <!-- Historial -->
         <div class="row">
             <span class="label">Historial:</span>
             <span id="history"></span>
         </div>
 
-        <!-- Botones principales -->
         <div class="buttons">
-            <button id="spinBtn" class="action-btn">🎰 GIRAR</button>
-            <button id="autoBtn" class="action-btn secondary">AUTO SPIN: OFF</button>
+            <button id="btnSpin" class="action-btn">🎰 GIRAR</button>
+            <button id="btnAuto" class="action-btn secondary">AUTO SPIN: OFF</button>
         </div>
 
-        <!-- Resultado -->
-        <div id="result" class="result">Selecciona color y apuesta…</div>
+        <div id="resultText" class="result">Selecciona color y apuesta…</div>
 
     </div>
 
     <script src="/static/app.js"></script>
 </body>
 </html>
-
-
-
-
-
-
