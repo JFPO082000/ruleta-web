@@ -27,12 +27,7 @@ const rouletteCanvas = document.getElementById("rouletteCanvas");
 const ctx = rouletteCanvas.getContext("2d");
 
 // Bola en otro canvas (para estética)
-const ballCanvas = document.createElement("canvas");
-ballCanvas.width = ballCanvas.height = 420;
-ballCanvas.style.position = "absolute";
-ballCanvas.style.left = "0";
-ballCanvas.style.top = "0";
-document.getElementById("canvasWrapper").appendChild(ballCanvas);
+const ballCanvas = document.getElementById("ballCanvas");
 const ballCtx = ballCanvas.getContext("2d");
 
 let wheelAngle = 0;
