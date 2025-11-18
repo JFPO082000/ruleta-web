@@ -22,7 +22,7 @@ body {
 }
 
 /* -----------------------------------------------------------
-   🌀 ZONA DE RULETA (420px EXACTOS – COINCIDE CON JS)
+   🌀 RULETA – 420px exactos (coincide con JS)
 ----------------------------------------------------------- */
 .canvas-wrapper {
     position: relative;
@@ -42,12 +42,12 @@ body {
     position: absolute;
     width: 420px;
     height: 420px;
+    border-radius: 50%;
     top: 0;
     left: 0;
-    border-radius: 50%;
 }
 
-/* RGB Glow */
+/* RGB ring */
 #rgbCanvas {
     z-index: 1;
     pointer-events: none;
@@ -56,18 +56,18 @@ body {
 /* Ruleta */
 #rouletteCanvas {
     z-index: 2;
-    background: transparent;
-
     border-radius: 50%;
     border: 4px solid #d4af37;
 
+    background: transparent;
     box-shadow:
-        0 0 18px rgba(255,215,100,0.7),
-        0 0 45px rgba(255,215,100,0.35),
+        0 0 22px rgba(255,215,100,0.65),
+        0 0 55px rgba(255,215,100,0.35),
         inset 0 0 32px rgba(0,0,0,0.9),
         inset 0 0 12px rgba(255,225,120,0.2);
 }
 
+/* Bola */
 #ballCanvas {
     z-index: 3;
 }
@@ -83,8 +83,8 @@ body {
 
     background: linear-gradient(145deg, #1f1f1f, #161616);
     border-radius: 18px;
-
     border: 2px solid #e7c359;
+
     box-shadow:
         0 0 18px rgba(0,0,0,0.7),
         0 0 12px rgba(255,220,100,0.3);
@@ -133,23 +133,16 @@ body {
 .color-btn:hover {
     transform: translateY(-2px);
     background: #444;
-    box-shadow:
-        inset 0 0 10px rgba(255,255,255,0.15),
-        0 6px 12px rgba(0,0,0,0.6);
 }
 
 .color-btn.selected {
     background: linear-gradient(145deg, #d4a235, #a17310);
     border-color: #ffde88;
     color: #000;
-
-    box-shadow:
-        inset 0 0 15px rgba(255,255,255,0.25),
-        0 4px 10px rgba(0,0,0,0.8);
 }
 
 /* -----------------------------------------------------------
-   🎰 BOTONES DE APUESTA (Fichas)
+   🎰 FICHAS
 ----------------------------------------------------------- */
 .chips {
     display: flex;
@@ -161,7 +154,6 @@ body {
     padding: 6px 13px;
     border-radius: 10px;
     cursor: pointer;
-
     font-size: 15px;
     font-weight: bold;
 
@@ -170,9 +162,6 @@ body {
     color: #fff;
 
     transition: 0.25s ease;
-    box-shadow:
-        inset 0 0 4px rgba(255,255,255,0.05),
-        0 3px 8px rgba(0,0,0,0.45);
 }
 
 .chip-btn:hover {
@@ -183,11 +172,6 @@ body {
 .chip-btn.selected {
     background: linear-gradient(145deg, #ffd86a, #c49b2e);
     color: #000;
-    border: 1px solid #ffe9a0;
-
-    box-shadow:
-        inset 0 0 12px rgba(255,255,255,0.4),
-        0 4px 12px rgba(0,0,0,0.6);
 }
 
 /* -----------------------------------------------------------
@@ -207,15 +191,14 @@ body {
 
     font-size: 17px;
     font-weight: bold;
-
     background: #5567d9;
     color: #fff;
 
-    box-shadow:
-        0 4px 10px rgba(0,0,0,0.6),
-        inset 0 0 8px rgba(255,255,255,0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+}
 
-    transition: 0.25s ease;
+.action-btn.secondary {
+    background: #444;
 }
 
 .action-btn:hover {
@@ -223,16 +206,8 @@ body {
     background: #6a7cf3;
 }
 
-.action-btn.secondary {
-    background: #444;
-}
-
-.action-btn.secondary:hover {
-    background: #555;
-}
-
 /* -----------------------------------------------------------
-   🟡 RESULTADO FINAL
+   🟡 RESULTADO
 ----------------------------------------------------------- */
 .result {
     margin-top: 18px;
@@ -240,20 +215,17 @@ body {
     font-size: 20px;
     font-weight: bold;
     color: #ffdf75;
-    text-shadow: 0 0 6px rgba(255,230,150,0.8);
 }
 
 /* Historial */
 #history {
     font-size: 15px;
     color: #ddd;
-    min-width: 200px;
-    display: inline-block;
 }
 
 /* Saldo */
-#balance {
+#saldo {
     font-weight: bold;
     color: #8aff8a;
-    font-size: 17px;
+    font-size: 18px;
 }
