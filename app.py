@@ -60,7 +60,7 @@ def api_spin():
         "number": number,      # → número ganador
         "color": result_color, # → color ganador
         "win": win,
-        "newBalance": new_balance
+        "newBalance": balance
     })
 
 
