@@ -7,7 +7,7 @@ import os
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
-# Orden oficial Ruleta Europea (sentido horario)
+# Orden oficial Ruleta Europea
 WHEEL_ORDER = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6,
     27, 13, 36, 11, 30, 8, 23, 10, 5, 24,
@@ -16,8 +16,10 @@ WHEEL_ORDER = [
 ]
 
 RED_NUMBERS = {
-    1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
+    1, 3, 5, 7, 9, 12, 14, 16, 18, 19,
+    21, 23, 25, 27, 30, 32, 34, 36
 }
+
 
 def color_of(n):
     if n == 0:
@@ -35,18 +37,18 @@ def api_spin():
     data = request.get_json(force=True)
 
     balance = int(data["balance"])
-    bet     = int(data["bet"])
-    color   = data["color"]
+    bet = int(data["bet"])
+    color = data["color"]
 
     if bet > balance:
         return jsonify({"error": "Saldo insuficiente"}), 400
 
-    # Elección aleatoria según ruleta real
+    # sector ganador
     idx = random.randint(0, len(WHEEL_ORDER) - 1)
     number = WHEEL_ORDER[idx]
     result_color = color_of(number)
 
-    # Cálculo de ganancias
+    # cálculo de ganancias
     if color == result_color:
         win = bet * (35 if color == "verde" else 1)
     else:
@@ -54,13 +56,14 @@ def api_spin():
 
     new_balance = balance - bet + win
 
-return jsonify({
-        "wheel": NUM_WHEEL,   # → orden correcto de la ruleta
+    # 🔥 ESTE return ESTABA MAL IDENTADO, ahora sí está correcto
+    return jsonify({
+        "wheel": WHEEL_ORDER,    # ← enviamos el orden real
         "index": idx,
         "number": number,
         "color": result_color,
         "win": win,
-        "newBalance": balance
+        "newBalance": new_balance
     })
 
 
