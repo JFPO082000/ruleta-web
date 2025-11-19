@@ -28,6 +28,7 @@ body {
     height: 460px;
     margin: 20px auto 30px;
     transition: transform 0.5s ease;
+    transition: transform 1s ease-out;
 }
 
 .canvas-wrapper.zoomed {
@@ -270,4 +271,46 @@ body {
     font-weight: bold;
     color: #8aff8a;
     font-size: 17px;
+}
+
+/* -----------------------------------------------------------
+   ✨ EFECTOS VISUALES DE RESULTADO
+----------------------------------------------------------- */
+
+/* --- Efecto de Victoria --- */
+.panel.win-effect {
+    animation: win-glow 0.8s ease-out;
+}
+
+@keyframes win-glow {
+    0% { box-shadow: 0 0 18px rgba(0,0,0,0.7), 0 0 12px rgba(255,220,100,0.3); }
+    50% { box-shadow: 0 0 35px rgba(50, 255, 150, 0.9), 0 0 20px rgba(50, 255, 150, 0.7); }
+    100% { box-shadow: 0 0 18px rgba(0,0,0,0.7), 0 0 12px rgba(255,220,100,0.3); }
+}
+
+#balance.win-effect {
+    animation: balance-win 0.8s ease-out;
+}
+
+@keyframes balance-win {
+    50% { transform: scale(1.2); color: #aaffaa; }
+}
+
+/* --- Efecto de Derrota --- */
+.panel.lose-effect {
+    animation: lose-shake 0.5s linear;
+}
+
+@keyframes lose-shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+    20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+
+#balance.lose-effect {
+    animation: balance-lose 0.8s ease-out;
+}
+
+@keyframes balance-lose {
+    50% { transform: scale(0.9); color: #ff8a8a; }
 }

@@ -290,6 +290,14 @@ function showResult() {
     document.getElementById("btnSpin").disabled = false;
     document.getElementById("btnAuto").disabled = false;
 
+    const panel = document.querySelector('.panel');
+
+    // Limpiar efectos anteriores
+    panel.classList.remove('win-effect', 'lose-effect');
+    saldoSpan.classList.remove('win-effect', 'lose-effect');
+    // Forzar reflow para que la animación se pueda repetir
+    void panel.offsetWidth; 
+
     // Crear un span para el nuevo número del historial con su color
     const historyEntry = document.createElement('span');
     historyEntry.textContent = winnerNumber;
@@ -301,8 +309,12 @@ function showResult() {
     if (lastWinAmount > 0) {
         updateMessage(`¡GANASTE! Número ${winnerNumber} (${winnerColor}) +$${lastWinAmount}`);
         sounds.win.play();
+        panel.classList.add('win-effect');
+        saldoSpan.classList.add('win-effect');
     } else {
         updateMessage(`Perdiste. Número ${winnerNumber} (${winnerColor}) -$${selectedBet}`);
+        panel.classList.add('lose-effect');
+        saldoSpan.classList.add('lose-effect');
     }
 
     if (autoSpin && saldo >= selectedBet) {
