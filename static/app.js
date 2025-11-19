@@ -198,7 +198,7 @@ function animateSpin() {
         drawBall();
 
         if (Math.abs(ballSpeed) < 0.015) {
-            const targetAngle = (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) - Math.PI / 2;
+            const targetAngle = wheelAngle + (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) - Math.PI / 2;
             const diff = (targetAngle - ballAngle) % (Math.PI * 2);
 
             if (Math.abs(diff) < 0.03) {
