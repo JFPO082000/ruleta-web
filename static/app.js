@@ -321,4 +321,5 @@ function drawBall() {
 // INICIAR DIBUJOS
 // -----------------------------------------------------------
 drawWheel();
+drawBall();
 updateMessage();
