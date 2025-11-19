@@ -208,17 +208,12 @@ function animateSpin() {
         drawWheel();
         drawBall();
 
+        // Cuando la bola está casi detenida, forzamos la posición final exacta.
         if (Math.abs(ballSpeed) < 0.015) {
-            const targetAngle = wheelAngle + (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) - Math.PI / 2;
-            const diff = (targetAngle - ballAngle) % (Math.PI * 2);
-
-            if (Math.abs(diff) < 0.03) {
-                ballRadius = R_BALL_END; // Asegura que la bola termine en el radio final
-                bounceBall(targetAngle);
-                return;
-            }
-
-            ballAngle += diff * 0.08;
+            const finalAngle = wheelAngle + (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) - Math.PI / 2;
+            ballRadius = R_BALL_END; // Asegura que la bola termine en el radio final
+            bounceBall(finalAngle); // Inicia el rebote desde la posición perfecta.
+            return; // Detiene la animación principal.
         }
 
         requestAnimationFrame(frame);
