@@ -52,6 +52,7 @@ let autoSpin = false;
 let winnerIndex = null;
 let winnerNumber = null;
 let winnerColor = null;
+let lastWinAmount = 0;
 
 // -----------------------------------------------------------
 // DOM CORRECTO PARA TU HTML
@@ -163,6 +164,7 @@ function spin(fromAuto) {
         winnerIndex = data.index;
         winnerNumber = data.number;
         winnerColor = data.color;
+        lastWinAmount = data.win;
         saldo = data.newBalance;
         saldoSpan.textContent = "$" + saldo;
 
@@ -250,12 +252,27 @@ function showResult() {
 
     historySpan.textContent = `${winnerNumber} ` + historySpan.textContent;
 
-    if (winnerColor === selectedColor) {
-        let gain = winnerColor === "verde" ? selectedBet * 35 : selectedBet;
-        updateMessage(`¡GANASTE! Número ${winnerNumber} (${winnerColor}) +$${gain}`);
+    if (lastWinAmount > 0) {
+        updateMessage(`¡GANASTE! Número ${winnerNumber} (${winnerColor}) +$${lastWinAmount}`);
     } else {
         updateMessage(`Perdiste. Número ${winnerNumber} (${winnerColor}) -$${selectedBet}`);
     }
+
+    if (autoSpin && saldo >= selectedBet) {
+        setTimeout(() => spin(true), 1500);
+    } else if (autoSpin) {
+        toggleAuto(); // Apagar si no hay saldo
+        updateMessage("Auto-spin detenido. Saldo insuficiente.");
+    }
+}
+
+// -----------------------------------------------------------
+// AUTO SPIN
+// -----------------------------------------------------------
+function toggleAuto() {
+    autoSpin = !autoSpin;
+    document.getElementById("btnAuto").textContent = `AUTO SPIN: ${autoSpin ? "ON" : "OFF"}`;
+    if (autoSpin && !spinning) spin(true);
 }
 
 // -----------------------------------------------------------
