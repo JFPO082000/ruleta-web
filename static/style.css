@@ -43,6 +43,7 @@ body {
     height: 460px;
     top: 0;
     left: 0;
+    background: transparent; /* Asegura que los canvas no se tapen entre sí */
     border-radius: 50%;
 }
 
