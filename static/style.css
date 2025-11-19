@@ -122,11 +122,10 @@ body {
     background: linear-gradient(145deg, #3a3a3a, #222);
     color: #eee;
     border: 1px solid #555;
-
-    transition: 0.25s ease;
     box-shadow:
         inset 0 0 5px rgba(255,255,255,0.06),
         0 4px 8px rgba(0,0,0,0.5);
+    transition: transform 0.25s ease, background 0.25s ease;
 }
 
 .color-btn:hover {
@@ -135,7 +134,7 @@ body {
 }
 
 .color-btn.selected {
-    background: linear-gradient(145deg, #d4a235, #a17310);
+    background: linear-gradient(145deg, var(--color-gold-medium), var(--color-gold-dark));
     border-color: #ffde88;
     color: #000;
 
