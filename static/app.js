@@ -160,7 +160,6 @@ function spin(fromAuto) {
             return;
         }
 
-        WHEEL_ORDER = data.wheel;
         winnerIndex = data.index;
         winnerNumber = data.number;
         winnerColor = data.color;
