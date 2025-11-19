@@ -20,11 +20,11 @@ const R_BALL_START = 195; // Radio inicial, en el borde exterior
 const R_BALL_END = 150;   // Radio final, ajustado para no superponerse a los números
 
 // Velocidades naturales
-const INITIAL_WHEEL_SPEED = 0.22; // Positivo: Ruleta gira en sentido horario
-const INITIAL_BALL_SPEED = -0.82;  // Negativo: Bola gira en sentido antihorario
+const INITIAL_WHEEL_SPEED = 0.05; // Más lento y realista
+const INITIAL_BALL_SPEED = -0.15;  // Más lento y realista
 
-const FRICTION_WHEEL = 0.9925;
-const FRICTION_BALL = 0.985;
+const FRICTION_WHEEL = 0.998; // Menos fricción para un giro más largo
+const FRICTION_BALL = 0.995;  // Menos fricción para un giro más largo
 
 // -----------------------------------------------------------
 // CANVAS
@@ -101,12 +101,25 @@ function generateChips() {
 // -----------------------------------------------------------
 // SELECCIÓN COLOR Y APUESTA
 // -----------------------------------------------------------
+
+// Función auxiliar para obtener el color de un número. Fuente única de verdad.
+function getColorForNumber(num) {
+    if (num === 0) return "verde";
+    const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+    return redNumbers.includes(num) ? "rojo" : "negro";
+}
+
 function selectColor(c) {
+    // 1. Quitar la clase 'selected' de todos los botones de color
     document.querySelectorAll(".color-btn")
         .forEach(b => b.classList.remove("selected"));
 
-    document.querySelector(`[data-color="${c}"]`).classList.add("selected");
+    // 2. CORRECCIÓN: Seleccionar el botón por su ID y añadir la clase 'selected'
+    // Tu HTML usa id="btnRojo", etc. No "data-color".
+    const buttonId = `btn${c.charAt(0).toUpperCase() + c.slice(1)}`;
+    document.getElementById(buttonId).classList.add("selected");
 
+    // 3. Guardar el color seleccionado
     selectedColor = c;
     updateMessage();
 }
@@ -202,46 +215,48 @@ function animateSpin() {
     ballRadius = R_BALL_START;
     drawBall();
 
-    // Ángulo objetivo para la ruleta, calculado para que el número ganador quede arriba (en -PI/2)
-    const targetAngle = (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length));
+    // El ángulo final donde debe quedar la bola para estar sobre el número ganador.
+    // El número ganador debe quedar en la parte superior (ángulo -PI/2 o 270 grados).
+    const finalWheelAngleForWinner = -(winnerIndex * (2 * Math.PI / WHEEL_ORDER.length));
 
     function frame() {
-        // Si la bola casi se ha detenido, comenzamos la fase de aterrizaje suave.
-        if (Math.abs(ballSpeed) < 0.01) {
-            // Interpolación suave (lerp) hacia la posición final
-            const lerpFactor = 0.05; // Controla la suavidad del aterrizaje
-            
-            // La bola se alinea con la ruleta
-            ballAngle = wheelAngle + targetAngle;
-            
-            // La ruleta se desliza suavemente hacia su posición final
-            const currentAngleMod = (wheelAngle % (2 * Math.PI));
-            const targetAngleMod = (-targetAngle % (2 * Math.PI));
-            const diff = targetAngleMod - currentAngleMod;
-            
-            wheelAngle += diff * lerpFactor;
-            
-            // Cuando está prácticamente en su sitio, detenemos y rebotamos.
-            if (Math.abs(diff) < 0.001) {
-                bounceBall(ballAngle);
-                return;
-            }
-        } else {
-            // Animación normal mientras hay velocidad
-            wheelAngle += wheelSpeed;
-            ballAngle += ballSpeed;
-            wheelSpeed *= FRICTION_WHEEL;
-            ballSpeed *= FRICTION_BALL;
+        // Si la bola se ha detenido, finalizamos la animación.
+        if (Math.abs(ballSpeed) < 0.0001) {
+            // Aseguramos la posición final exacta y comenzamos el rebote.
+            wheelAngle = finalWheelAngleForWinner;
+            ballAngle = wheelAngle; // La bola cae justo en la parte superior
+            bounceBall(ballAngle);
+            return;
         }
+
+        // --- MOVIMIENTO INDEPENDIENTE ---
+        // La bola y la ruleta se mueven y frenan por su cuenta.
+        wheelAngle += wheelSpeed;
+        ballAngle += ballSpeed;
+        ballSpeed *= FRICTION_BALL;
+
+        // --- CORRECCIÓN GUIADA (La magia está aquí) ---
+        // 1. Predecimos dónde terminará la ruleta si no hacemos nada.
+        const predictedFinalWheelAngle = wheelAngle + wheelSpeed * (1 - Math.pow(FRICTION_WHEEL, 5000)) / (1 - FRICTION_WHEEL);
+
+        // 2. Calculamos la diferencia con donde DEBERÍA terminar.
+        const error = (finalWheelAngleForWinner - predictedFinalWheelAngle);
+
+        // 3. Aplicamos una corrección diminuta a la fricción de la ruleta.
+        // El factor 0.0001 es clave: lo suficientemente pequeño para ser invisible.
+        const correction = error * 0.0001;
+        const correctedFriction = FRICTION_WHEEL + correction;
+
+        // 4. Aplicamos la velocidad y la fricción corregida.
+        wheelSpeed *= correctedFriction;
 
         // La bola "cae" hacia el centro a medida que pierde velocidad
         const speedRatio = Math.max(0, Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED));
         ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * speedRatio;
 
         // --- SONIDO DE CLIC ---
-        if (speedRatio > 0.1 && Math.abs(ballSpeed) > Math.abs(wheelSpeed)) {
-            if (Math.abs(ballAngle % 0.1) < 0.01) sounds.click.play();
-        }
+        // Lo hacemos más espaciado para que suene mejor con la nueva velocidad
+        if (speedRatio > 0.1 && Math.abs(ballAngle % 0.17) < 0.005) sounds.click.play();
 
         drawWheel();
         drawBall();
@@ -266,7 +281,7 @@ function bounceBall(finalAngle) {
         if (t > 1) t = 1;
 
         const decay = 1 - t;
-        const offset = Math.sin(t * bounces * Math.PI) * amp * decay;
+        const offset = Math.sin(t * bounces * Math.PI) * amp * decay * Math.sin(t * Math.PI);
 
         ballAngle = finalAngle + offset;
 
@@ -350,12 +365,9 @@ function drawWheel() {
         const end   = start + anglePerSlice;
 
         const num = WHEEL_ORDER[i];
-        const col =
-            num === 0 ? "#0bb400" :
-            // Corrección: Usar la misma lista de rojos que el backend
-            [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36].includes(num)
-            ? "#d00000" : "#000";
-
+        // CORRECCIÓN: Usar la función centralizada para obtener el color correcto y consistente.
+        const colorName = getColorForNumber(num);
+        const col = colorName === 'rojo' ? '#d00000' : colorName === 'negro' ? '#000' : '#0bb400';
         // sector
         ctx.beginPath();
         ctx.moveTo(CENTER, CENTER);
