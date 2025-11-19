@@ -17,7 +17,7 @@ const R_WHEEL = 210;
 
 // Radios de la bola para el efecto de "caída"
 const R_BALL_START = 195; // Radio inicial, en el borde exterior
-const R_BALL_END = 170;   // Radio final, sobre los números
+const R_BALL_END = 150;   // Radio final, ajustado para no superponerse a los números
 
 // Velocidades naturales
 const INITIAL_WHEEL_SPEED = 0.22; // Positivo: Ruleta gira en sentido horario
