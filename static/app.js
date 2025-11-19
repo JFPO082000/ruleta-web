@@ -261,21 +261,30 @@ function alignWheelToWinner() {
     const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
     const targetAngle = -(winnerIndex * anglePerSlice + anglePerSlice / 2) + Math.PI / 2;
 
+    // Guardamos la posición actual de la ruleta para una transición suave.
+    const initialWheelAngle = wheelAngle;
     const duration = 1500; // La ruleta tarda 1.5s en detenerse.
     const start = performance.now();
 
     function alignFrame(now) {
         let t = (now - start) / duration;
-        // Usamos una función de easing (ease-out) para que la desaceleración sea suave.
-        t = 1 - Math.pow(1 - t, 3);
-
         if (t > 1) t = 1;
 
-        // Calculamos la diferencia de ángulo que queda por recorrer.
-        const angleDifference = (targetAngle - wheelAngle) % (2 * Math.PI);
-        
-        // Movemos la ruleta una fracción del camino restante.
-        wheelAngle += angleDifference * t * 0.1;
+        // Usamos una función de easing (ease-out) para que la desaceleración sea suave.
+        const easedT = 1 - Math.pow(1 - t, 3);
+
+        // --- CORRECCIÓN DE LA ANIMACIÓN ---
+        // Calculamos la diferencia de ángulo por el camino más corto.
+        let angleDifference = targetAngle - initialWheelAngle;
+        if (angleDifference > Math.PI) angleDifference -= 2 * Math.PI;
+        if (angleDifference < -Math.PI) angleDifference += 2 * Math.PI;
+
+        // El ángulo final real, considerando las vueltas que ya ha dado.
+        const finalTargetAngle = initialWheelAngle + angleDifference;
+
+        // Interpolamos suavemente desde el ángulo inicial al final usando el tiempo con easing.
+        // Esto evita el "salto" y crea una desaceleración perfecta.
+        wheelAngle = initialWheelAngle + (finalTargetAngle - initialWheelAngle) * easedT;
 
         drawWheel();
         drawBall(); // Volvemos a dibujar la bola para que permanezca estática.
@@ -287,34 +296,6 @@ function alignWheelToWinner() {
         }
     }
     requestAnimationFrame(alignFrame);
-}
-
-// -----------------------------------------------------------
-// REBOTE REALISTA FINAL
-// -----------------------------------------------------------
-function bounceBall(finalAngle) {
-    const amp = 0.05;
-    const bounces = 10;
-    const duration = 700;
-    const start = performance.now();
-
-    function bounce(now) {
-        let t = (now - start) / duration;
-        if (t > 1) t = 1;
-
-        const decay = 1 - t;
-        const offset = Math.sin(t * bounces * Math.PI) * amp * decay * Math.sin(t * Math.PI);
-
-        ballAngle = finalAngle + offset;
-
-        drawWheel();
-        drawBall();
-
-        if (t < 1) requestAnimationFrame(bounce);
-        else alignWheelToWinner(); // CAMBIO: En lugar de mostrar resultado, alineamos la ruleta.
-    }
-
-    requestAnimationFrame(bounce);
 }
 
 // -----------------------------------------------------------
