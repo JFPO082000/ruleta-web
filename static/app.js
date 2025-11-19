@@ -264,8 +264,6 @@ function showResult() {
 function drawWheel() {
     ctx.clearRect(0,0,460,460);
 
-    if (!WHEEL_ORDER.length) return;
-
     const slices = WHEEL_ORDER.length;
     const anglePerSlice = (Math.PI * 2) / slices;
 
