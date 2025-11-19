@@ -43,6 +43,12 @@ rgbCanvas.width = rgbCanvas.height = 460;
 ballCanvas.width = ballCanvas.height = 460;
 
 // Estado
+const sounds = {
+    click: new Audio('/static/sounds/click.wav'),
+    win: new Audio('/static/sounds/win.wav'),
+    lose: new Audio('/static/sounds/lose.wav')
+};
+
 let wheelAngle = 0;
 let ballAngle = 0;
 let ballRadius = R_BALL_START; // El radio de la bola ahora es variable
@@ -147,6 +153,10 @@ function spin(fromAuto) {
 
     spinning = true;
     updateMessage("Girando…");
+    
+    // Deshabilitar botones durante el giro
+    document.getElementById("btnSpin").disabled = true;
+    document.getElementById("btnAuto").disabled = true;
 
     fetch("/api/spin", {
         method: "POST",
@@ -192,6 +202,21 @@ function animateSpin() {
     ballRadius = R_BALL_START;
     drawBall();
 
+    // --- LÓGICA DE ANIMACIÓN REALISTA ---
+    // 1. Calcular cuántos fotogramas tardará la bola en detenerse.
+    let ballFrames = 0;
+    let tempSpeed = INITIAL_BALL_SPEED;
+    while (Math.abs(tempSpeed) > 0.001) { // Umbral de detención
+        tempSpeed *= FRICTION_BALL;
+        ballFrames++;
+    }
+
+    // 2. Calcular el ángulo final de la bola después de esos fotogramas.
+    const finalBallAngle = ballAngle + INITIAL_BALL_SPEED * (1 - Math.pow(FRICTION_BALL, ballFrames)) / (1 - FRICTION_BALL);
+
+    // 3. Calcular el ángulo objetivo de la ruleta para que el número ganador coincida.
+    const targetWheelAngle = finalBallAngle - (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) + Math.PI / 2;
+
     function frame() {
         wheelAngle += wheelSpeed;
         ballAngle += ballSpeed;
@@ -200,29 +225,25 @@ function animateSpin() {
         ballSpeed *= FRICTION_BALL;
 
         // La bola "cae" hacia el centro a medida que pierde velocidad
-        const speedRatio = Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED);
-        if (speedRatio < 0.3) { // Empieza a caer cuando la velocidad es baja
-            ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * (speedRatio / 0.3);
+        const speedRatio = Math.max(0, Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED));
+        ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * speedRatio;
+
+        // --- SONIDO DE CLIC ---
+        // Reproduce un clic basado en la velocidad de la bola
+        if (speedRatio > 0.1 && Math.abs(ballSpeed) > Math.abs(wheelSpeed)) {
+             // El % 0.1 simula la frecuencia de paso por las casillas
+            if (Math.abs(ballAngle % 0.1) < 0.01) sounds.click.play();
         }
 
         drawWheel();
         drawBall();
 
-        // Cuando la bola está casi detenida, la guiamos suavemente a su posición final.
-        if (Math.abs(ballSpeed) < 0.015) {
-            const targetAngle = wheelAngle + (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) - Math.PI / 2;
-            
-            // Calcula la diferencia de ángulo más corta (considerando la vuelta completa)
-            let diff = targetAngle - ballAngle;
-            if (diff > Math.PI) diff -= Math.PI * 2;
-            if (diff < -Math.PI) diff += Math.PI * 2;
-
-            // Si está muy cerca, inicia el rebote. Si no, se acerca suavemente.
-            if (Math.abs(diff) < 0.01) {
-                bounceBall(targetAngle);
-                return;
-            }
-            ballAngle += diff * 0.1; // El 0.1 controla la suavidad del asentamiento
+        // Cuando la bola se detiene, ajustamos la ruleta a su posición final y rebotamos.
+        if (Math.abs(ballSpeed) < 0.001) {
+            wheelAngle = targetWheelAngle; // Ajuste final y preciso de la ruleta
+            ballAngle = finalBallAngle;   // Ajuste final de la bola
+            bounceBall(finalBallAngle);
+            return;
         }
 
         requestAnimationFrame(frame);
@@ -265,10 +286,21 @@ function bounceBall(finalAngle) {
 function showResult() {
     spinning = false;
 
-    historySpan.textContent = `${winnerNumber} ` + historySpan.textContent;
+    // Habilitar botones de nuevo
+    document.getElementById("btnSpin").disabled = false;
+    document.getElementById("btnAuto").disabled = false;
+
+    // Crear un span para el nuevo número del historial con su color
+    const historyEntry = document.createElement('span');
+    historyEntry.textContent = winnerNumber;
+    historyEntry.className = `history-entry color-${winnerColor}`;
+    
+    // Añadirlo al principio del historial
+    historySpan.prepend(historyEntry);
 
     if (lastWinAmount > 0) {
         updateMessage(`¡GANASTE! Número ${winnerNumber} (${winnerColor}) +$${lastWinAmount}`);
+        sounds.win.play();
     } else {
         updateMessage(`Perdiste. Número ${winnerNumber} (${winnerColor}) -$${selectedBet}`);
     }
