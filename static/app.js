@@ -14,11 +14,14 @@ let WHEEL_ORDER = [
 // Coordenadas
 const CENTER = 230;
 const R_WHEEL = 210;
-const R_BALL = 150;
+
+// Radios de la bola para el efecto de "caída"
+const R_BALL_START = 195; // Radio inicial, en el borde exterior
+const R_BALL_END = 170;   // Radio final, sobre los números
 
 // Velocidades naturales
-const INITIAL_WHEEL_SPEED = 0.22;
-const INITIAL_BALL_SPEED = -0.82;
+const INITIAL_WHEEL_SPEED = -0.22; // Negativo: Ruleta gira en sentido horario
+const INITIAL_BALL_SPEED = 0.82;   // Positivo: Bola gira en sentido antihorario
 
 const FRICTION_WHEEL = 0.9925;
 const FRICTION_BALL = 0.985;
@@ -42,6 +45,7 @@ ballCanvas.width = ballCanvas.height = 460;
 // Estado
 let wheelAngle = 0;
 let ballAngle = 0;
+let ballRadius = R_BALL_START; // El radio de la bola ahora es variable
 let spinning = false;
 
 let saldo = 1000;
@@ -185,6 +189,7 @@ function animateSpin() {
 
     // Reiniciar la posición de la bola para la nueva animación
     ballAngle = 0;
+    ballRadius = R_BALL_START;
     drawBall();
 
     function frame() {
@@ -194,6 +199,12 @@ function animateSpin() {
         wheelSpeed *= FRICTION_WHEEL;
         ballSpeed *= FRICTION_BALL;
 
+        // La bola "cae" hacia el centro a medida que pierde velocidad
+        const speedRatio = Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED);
+        if (speedRatio < 0.3) { // Empieza a caer cuando la velocidad es baja
+            ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * (speedRatio / 0.3);
+        }
+
         drawWheel();
         drawBall();
 
@@ -202,7 +213,7 @@ function animateSpin() {
             const diff = (targetAngle - ballAngle) % (Math.PI * 2);
 
             if (Math.abs(diff) < 0.03) {
-                ballAngle = targetAngle;
+                ballRadius = R_BALL_END; // Asegura que la bola termine en el radio final
                 bounceBall(targetAngle);
                 return;
             }
@@ -322,8 +333,8 @@ function drawWheel() {
 function drawBall() {
     ballCtx.clearRect(0,0,460,460);
 
-    const x = CENTER + Math.cos(ballAngle) * R_BALL;
-    const y = CENTER + Math.sin(ballAngle) * R_BALL;
+    const x = CENTER + Math.cos(ballAngle) * ballRadius;
+    const y = CENTER + Math.sin(ballAngle) * ballRadius;
 
     ballCtx.beginPath();
     ballCtx.arc(x, y, 12, 0, Math.PI * 2);
