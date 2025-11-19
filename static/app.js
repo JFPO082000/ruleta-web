@@ -182,6 +182,10 @@ function animateSpin() {
     let wheelSpeed = INITIAL_WHEEL_SPEED;
     let ballSpeed = INITIAL_BALL_SPEED;
 
+    // Reiniciar la posición de la bola para la nueva animación
+    ballAngle = 0;
+    drawBall();
+
     function frame() {
         wheelAngle += wheelSpeed;
         ballAngle += ballSpeed;
@@ -317,5 +321,4 @@ function drawBall() {
 // INICIAR DIBUJOS
 // -----------------------------------------------------------
 drawWheel();
-drawBall();
 updateMessage();
