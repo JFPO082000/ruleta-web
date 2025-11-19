@@ -20,8 +20,8 @@ const R_BALL_START = 195; // Radio inicial, en el borde exterior
 const R_BALL_END = 170;   // Radio final, sobre los números
 
 // Velocidades naturales
-const INITIAL_WHEEL_SPEED = -0.22; // Negativo: Ruleta gira en sentido horario
-const INITIAL_BALL_SPEED = 0.82;   // Positivo: Bola gira en sentido antihorario
+const INITIAL_WHEEL_SPEED = 0.22; // Positivo: Ruleta gira en sentido horario
+const INITIAL_BALL_SPEED = -0.82;  // Negativo: Bola gira en sentido antihorario
 
 const FRICTION_WHEEL = 0.9925;
 const FRICTION_BALL = 0.985;
