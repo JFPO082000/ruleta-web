@@ -202,49 +202,49 @@ function animateSpin() {
     ballRadius = R_BALL_START;
     drawBall();
 
-    // --- LÓGICA DE ANIMACIÓN REALISTA ---
-    // 1. Calcular cuántos fotogramas tardará la bola en detenerse.
-    let ballFrames = 0;
-    let tempSpeed = INITIAL_BALL_SPEED;
-    while (Math.abs(tempSpeed) > 0.001) { // Umbral de detención
-        tempSpeed *= FRICTION_BALL;
-        ballFrames++;
-    }
-
-    // 2. Calcular el ángulo final de la bola después de esos fotogramas.
-    const finalBallAngle = ballAngle + INITIAL_BALL_SPEED * (1 - Math.pow(FRICTION_BALL, ballFrames)) / (1 - FRICTION_BALL);
-
-    // 3. Calcular el ángulo objetivo de la ruleta para que el número ganador coincida.
-    const targetWheelAngle = finalBallAngle - (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) + Math.PI / 2;
+    // Ángulo objetivo para la ruleta, calculado para que el número ganador quede arriba (en -PI/2)
+    const targetAngle = (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length));
 
     function frame() {
-        wheelAngle += wheelSpeed;
-        ballAngle += ballSpeed;
-
-        wheelSpeed *= FRICTION_WHEEL;
-        ballSpeed *= FRICTION_BALL;
+        // Si la bola casi se ha detenido, comenzamos la fase de aterrizaje suave.
+        if (Math.abs(ballSpeed) < 0.01) {
+            // Interpolación suave (lerp) hacia la posición final
+            const lerpFactor = 0.05; // Controla la suavidad del aterrizaje
+            
+            // La bola se alinea con la ruleta
+            ballAngle = wheelAngle + targetAngle;
+            
+            // La ruleta se desliza suavemente hacia su posición final
+            const currentAngleMod = (wheelAngle % (2 * Math.PI));
+            const targetAngleMod = (-targetAngle % (2 * Math.PI));
+            const diff = targetAngleMod - currentAngleMod;
+            
+            wheelAngle += diff * lerpFactor;
+            
+            // Cuando está prácticamente en su sitio, detenemos y rebotamos.
+            if (Math.abs(diff) < 0.001) {
+                bounceBall(ballAngle);
+                return;
+            }
+        } else {
+            // Animación normal mientras hay velocidad
+            wheelAngle += wheelSpeed;
+            ballAngle += ballSpeed;
+            wheelSpeed *= FRICTION_WHEEL;
+            ballSpeed *= FRICTION_BALL;
+        }
 
         // La bola "cae" hacia el centro a medida que pierde velocidad
         const speedRatio = Math.max(0, Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED));
         ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * speedRatio;
 
         // --- SONIDO DE CLIC ---
-        // Reproduce un clic basado en la velocidad de la bola
         if (speedRatio > 0.1 && Math.abs(ballSpeed) > Math.abs(wheelSpeed)) {
-             // El % 0.1 simula la frecuencia de paso por las casillas
             if (Math.abs(ballAngle % 0.1) < 0.01) sounds.click.play();
         }
 
         drawWheel();
         drawBall();
-
-        // Cuando la bola se detiene, ajustamos la ruleta a su posición final y rebotamos.
-        if (Math.abs(ballSpeed) < 0.001) {
-            wheelAngle = targetWheelAngle; // Ajuste final y preciso de la ruleta
-            ballAngle = finalBallAngle;   // Ajuste final de la bola
-            bounceBall(finalBallAngle);
-            return;
-        }
 
         requestAnimationFrame(frame);
     }
