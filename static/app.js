@@ -2,8 +2,14 @@
 // 🔵 RULETA EUROPEA – CLIENTE SINCRONIZADO CON BACKEND
 // -----------------------------------------------------------
 
-// Los números vendrán del backend
-let WHEEL_ORDER = [];
+// Números de la ruleta en orden. Ahora se inicializan aquí
+// para que la ruleta se dibuje al cargar la página.
+let WHEEL_ORDER = [
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6,
+    27, 13, 36, 11, 30, 8, 23, 10, 5, 24,
+    16, 33, 1, 20, 14, 31, 9, 22, 18, 29,
+    7, 28, 12, 35, 3, 26
+];
 
 // Coordenadas
 const CENTER = 230;
@@ -268,7 +274,8 @@ function drawWheel() {
         const num = WHEEL_ORDER[i];
         const col =
             num === 0 ? "#0bb400" :
-            [32,19,21,25,34,27,36,30,23,5,16,1,14,9,18,7,12,3].includes(num)
+            // Corrección: Usar la misma lista de rojos que el backend
+            [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36].includes(num)
             ? "#d00000" : "#000";
 
         // sector
