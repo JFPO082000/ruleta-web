@@ -258,13 +258,26 @@ function alignWheelToWinner() {
 
     // 2. Calculamos el ángulo final exacto para la ruleta.
     // El centro del sector del número ganador debe quedar en -PI/2.
+    // CORRECCIÓN: Se elimina el "+ Math.PI / 2" que causaba una desalineación.
     const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
-    const targetAngle = -(winnerIndex * anglePerSlice + anglePerSlice / 2) + Math.PI / 2;
+    const targetAngleRaw = -(winnerIndex * anglePerSlice + anglePerSlice / 2);
 
     // Guardamos la posición actual de la ruleta para una transición suave.
     const initialWheelAngle = wheelAngle;
     const duration = 1500; // La ruleta tarda 1.5s en detenerse.
     const start = performance.now();
+
+    // --- CORRECCIÓN DE LA ANIMACIÓN (Lógica de alineación) ---
+    // Normalizamos los ángulos para trabajar en un espacio consistente (0 a 2PI)
+    // Esto evita el "giro extra" al calcular la diferencia.
+    const twoPI = 2 * Math.PI;
+    const currentNormalized = (initialWheelAngle % twoPI + twoPI) % twoPI;
+    let targetNormalized = (targetAngleRaw % twoPI + twoPI) % twoPI;
+
+    // Aseguramos que la ruleta siempre gire hacia adelante (sentido horario)
+    if (targetNormalized < currentNormalized) {
+        targetNormalized += twoPI;
+    }
 
     function alignFrame(now) {
         let t = (now - start) / duration;
@@ -273,18 +286,12 @@ function alignWheelToWinner() {
         // Usamos una función de easing (ease-out) para que la desaceleración sea suave.
         const easedT = 1 - Math.pow(1 - t, 3);
 
-        // --- CORRECCIÓN DE LA ANIMACIÓN ---
-        // Calculamos la diferencia de ángulo por el camino más corto.
-        let angleDifference = targetAngle - initialWheelAngle;
-        if (angleDifference > Math.PI) angleDifference -= 2 * Math.PI;
-        if (angleDifference < -Math.PI) angleDifference += 2 * Math.PI;
-
-        // El ángulo final real, considerando las vueltas que ya ha dado.
-        const finalTargetAngle = initialWheelAngle + angleDifference;
-
         // Interpolamos suavemente desde el ángulo inicial al final usando el tiempo con easing.
-        // Esto evita el "salto" y crea una desaceleración perfecta.
-        wheelAngle = initialWheelAngle + (finalTargetAngle - initialWheelAngle) * easedT;
+        // La interpolación se hace entre los ángulos normalizados para garantizar el movimiento correcto.
+        const interpolatedNormalized = currentNormalized + (targetNormalized - currentNormalized) * easedT;
+        
+        // Asignamos el ángulo final, manteniendo las vueltas completas originales.
+        wheelAngle = initialWheelAngle - currentNormalized + interpolatedNormalized;
 
         drawWheel();
         drawBall(); // Volvemos a dibujar la bola para que permanezca estática.
