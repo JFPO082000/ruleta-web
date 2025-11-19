@@ -215,20 +215,10 @@ function animateSpin() {
     ballRadius = R_BALL_START;
     drawBall();
 
-    // El ángulo final donde debe quedar la bola para estar sobre el número ganador.
-    // El número ganador debe quedar en la parte superior (ángulo -PI/2 o 270 grados).
-    // CORRECCIÓN: Se ajusta el ángulo final para que coincida con el centro del sector del número ganador.
-    const anglePerSlice = (2 * Math.PI / WHEEL_ORDER.length);
-    const finalWheelAngleForWinner = -(winnerIndex * anglePerSlice + anglePerSlice / 2);
-
     function frame() {
-        // CORRECCIÓN: La condición de fin debe ser cuando la bola está cerca de su radio final Y su velocidad es muy baja.
-        // Esto evita que la animación termine antes de tiempo si la bola se ralentiza demasiado pronto.
-        if (ballRadius < R_BALL_END + 1 && Math.abs(ballSpeed) < 0.0005) {
-            // Aseguramos la posición final exacta y comenzamos el rebote.
-            wheelAngle = finalWheelAngleForWinner + Math.PI / 2; // Ajuste final para alinear con el dibujo (-PI/2 en drawWheel)
-            ballAngle = wheelAngle; // La bola cae justo en la parte superior
-            bounceBall(ballAngle);
+        // Si la velocidad de la bola es casi cero, la bola se detiene y la ruleta empieza su alineación final.
+        if (Math.abs(ballSpeed) < 0.001) {
+            alignWheelToWinner();
             return;
         }
 
@@ -236,22 +226,6 @@ function animateSpin() {
         // La bola y la ruleta se mueven y frenan por su cuenta.
         wheelAngle += wheelSpeed;
         ballAngle += ballSpeed;
-        ballSpeed *= FRICTION_BALL;
-
-        // --- CORRECCIÓN GUIADA (La magia está aquí) ---
-        // 1. Predecimos dónde terminará la ruleta si no hacemos nada.
-        const predictedFinalWheelAngle = wheelAngle + wheelSpeed * (1 - Math.pow(FRICTION_WHEEL, 5000)) / (1 - FRICTION_WHEEL);
-
-        // 2. Calculamos la diferencia con donde DEBERÍA terminar.
-        const error = (finalWheelAngleForWinner - predictedFinalWheelAngle);
-
-        // 3. Aplicamos una corrección diminuta a la fricción de la ruleta.
-        // El factor 0.0001 es clave: lo suficientemente pequeño para ser invisible.
-        const correction = error * 0.0001;
-        const correctedFriction = FRICTION_WHEEL + correction;
-
-        // 4. Aplicamos la velocidad y la fricción corregida.
-        wheelSpeed *= correctedFriction;
 
         // La bola "cae" hacia el centro a medida que pierde velocidad
         const speedRatio = Math.max(0, Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED));
@@ -261,6 +235,9 @@ function animateSpin() {
         // Lo hacemos más espaciado para que suene mejor con la nueva velocidad
         if (speedRatio > 0.1 && Math.abs(ballAngle % 0.17) < 0.005) sounds.click.play();
 
+        wheelSpeed *= FRICTION_WHEEL;
+        ballSpeed *= FRICTION_BALL;
+
         drawWheel();
         drawBall();
 
@@ -268,6 +245,48 @@ function animateSpin() {
     }
 
     requestAnimationFrame(frame);
+}
+
+// -----------------------------------------------------------
+// FASE 2: LA RULETA SE ALINEA CON EL GANADOR
+// -----------------------------------------------------------
+function alignWheelToWinner() {
+    // 1. La bola se detiene en la parte superior.
+    ballAngle = -Math.PI / 2;
+    ballRadius = R_BALL_END;
+    drawBall();
+
+    // 2. Calculamos el ángulo final exacto para la ruleta.
+    // El centro del sector del número ganador debe quedar en -PI/2.
+    const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
+    const targetAngle = -(winnerIndex * anglePerSlice + anglePerSlice / 2) + Math.PI / 2;
+
+    const duration = 1500; // La ruleta tarda 1.5s en detenerse.
+    const start = performance.now();
+
+    function alignFrame(now) {
+        let t = (now - start) / duration;
+        // Usamos una función de easing (ease-out) para que la desaceleración sea suave.
+        t = 1 - Math.pow(1 - t, 3);
+
+        if (t > 1) t = 1;
+
+        // Calculamos la diferencia de ángulo que queda por recorrer.
+        const angleDifference = (targetAngle - wheelAngle) % (2 * Math.PI);
+        
+        // Movemos la ruleta una fracción del camino restante.
+        wheelAngle += angleDifference * t * 0.1;
+
+        drawWheel();
+        drawBall(); // Volvemos a dibujar la bola para que permanezca estática.
+
+        if (t < 1) {
+            requestAnimationFrame(alignFrame);
+        } else {
+            showResult(); // La animación ha terminado por completo.
+        }
+    }
+    requestAnimationFrame(alignFrame);
 }
 
 // -----------------------------------------------------------
@@ -292,7 +311,7 @@ function bounceBall(finalAngle) {
         drawBall();
 
         if (t < 1) requestAnimationFrame(bounce);
-        else showResult();
+        else alignWheelToWinner(); // CAMBIO: En lugar de mostrar resultado, alineamos la ruleta.
     }
 
     requestAnimationFrame(bounce);
