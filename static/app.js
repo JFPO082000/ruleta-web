@@ -313,6 +313,7 @@ function showResult() {
         saldoSpan.classList.add('win-effect');
     } else {
         updateMessage(`Perdiste. Número ${winnerNumber} (${winnerColor}) -$${selectedBet}`);
+        sounds.lose.play();
         panel.classList.add('lose-effect');
         saldoSpan.classList.add('lose-effect');
     }
