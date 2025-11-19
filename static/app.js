@@ -217,13 +217,16 @@ function animateSpin() {
 
     // El ángulo final donde debe quedar la bola para estar sobre el número ganador.
     // El número ganador debe quedar en la parte superior (ángulo -PI/2 o 270 grados).
-    const finalWheelAngleForWinner = -(winnerIndex * (2 * Math.PI / WHEEL_ORDER.length));
+    // CORRECCIÓN: Se ajusta el ángulo final para que coincida con el centro del sector del número ganador.
+    const anglePerSlice = (2 * Math.PI / WHEEL_ORDER.length);
+    const finalWheelAngleForWinner = -(winnerIndex * anglePerSlice + anglePerSlice / 2);
 
     function frame() {
-        // Si la bola se ha detenido, finalizamos la animación.
-        if (Math.abs(ballSpeed) < 0.0001) {
+        // CORRECCIÓN: La condición de fin debe ser cuando la bola está cerca de su radio final Y su velocidad es muy baja.
+        // Esto evita que la animación termine antes de tiempo si la bola se ralentiza demasiado pronto.
+        if (ballRadius < R_BALL_END + 1 && Math.abs(ballSpeed) < 0.0005) {
             // Aseguramos la posición final exacta y comenzamos el rebote.
-            wheelAngle = finalWheelAngleForWinner;
+            wheelAngle = finalWheelAngleForWinner + Math.PI / 2; // Ajuste final para alinear con el dibujo (-PI/2 en drawWheel)
             ballAngle = wheelAngle; // La bola cae justo en la parte superior
             bounceBall(ballAngle);
             return;
