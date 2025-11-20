@@ -246,8 +246,8 @@ function initPhysics() {
         label: 'wheel'
     });
 
-    // Añadimos el muro, la ruleta y los separadores al mundo.
-    World.add(world, [wall, wheelBody, ...pegs]);
+    // Añadimos el muro y el cuerpo compuesto de la ruleta al mundo.
+    World.add(world, [wall, wheelBody]);
 
     // Bucle de actualización del motor.
     Events.on(engine, 'afterUpdate', () => {
