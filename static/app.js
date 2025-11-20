@@ -218,6 +218,13 @@ function initPhysics() {
     world = engine.world;
     world.gravity.y = 0; // No queremos gravedad hacia abajo.
 
+    // --- MURO CONTENEDOR ---
+    // Añadimos un cuerpo estático circular (un "muro") para que la bola no se salga.
+    const wall = Bodies.circle(CENTER, CENTER, R_WHEEL + 10, {
+        isStatic: true,
+        render: { visible: false } // No queremos que se vea
+    });
+
     // --- NUEVA LÓGICA: CUERPO COMPUESTO ---
     // 1. Creamos los separadores (pegs) como cuerpos individuales.
     const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
@@ -234,13 +241,13 @@ function initPhysics() {
     wheelBody = Body.create({
         parts: [wheelDisc, ...pegs], // Combinamos el disco y los pegs en un solo cuerpo.
         isStatic: false, // ¡Ahora es un cuerpo dinámico!
-        frictionAir: 0.005, // Fricción del aire para que desacelere suavemente.
-        inverseInertia: 0.00001, // Inercia muy alta para que no se frene con los choques de la bola.
+        frictionAir: 0.01, // Aumentamos la fricción para que no gire eternamente.
+        inverseInertia: 0.00005, // Reducimos la inercia para que la bola influya un poco más.
         label: 'wheel'
     });
 
-    // Añadimos todo al mundo.
-    World.add(world, [wheelBody, ...pegs]);
+    // Añadimos el muro, la ruleta y los separadores al mundo.
+    World.add(world, [wall, wheelBody, ...pegs]);
 
     // Bucle de actualización del motor.
     Events.on(engine, 'afterUpdate', () => {
@@ -251,7 +258,7 @@ function initPhysics() {
         if (!spinning) return;
 
         // Fuerza que atrae la bola al centro (simula la caída).
-        const pullForce = 0.0005; // Aumentamos la fuerza para que la bola caiga de forma más natural.
+        const pullForce = 0.0008; // Aumentamos la fuerza para que la bola caiga de forma más natural.
         const vector = { x: CENTER - ballBody.position.x, y: CENTER - ballBody.position.y };
         const normalized = Matter.Vector.normalise(vector);
         const force = { x: normalized.x * pullForce, y: normalized.y * pullForce };
@@ -267,10 +274,14 @@ function initPhysics() {
         }
 
         // Condición de fin de la animación.
-        if (isGuiding && Math.abs(wheelBody.angularSpeed) < 0.0001 && ballBody.speed < 0.01) {
+        if (isGuiding && Math.abs(wheelBody.angularSpeed) < 0.001 && ballBody.speed < 0.05) {
             spinning = false;
             isGuiding = false;
+            // Detenemos la ruleta y la bola completamente.
             Body.setAngularVelocity(wheelBody, 0); // Detener completamente.
+            Body.setVelocity(ballBody, {x: 0, y: 0});
+            // La movemos a su posición final exacta sobre el número.
+            guideBallToFinalPosition();
             World.remove(world, ballBody);
             ballBody = null;
             showResult();
@@ -299,19 +310,20 @@ function initPhysics() {
 
 function startPhysicsSpin() {
     // Creamos la bola en su posición inicial.
-    // CORRECCIÓN: La creamos un poco a la derecha para que la velocidad inicial la ponga en órbita.
-    ballBody = Bodies.circle(CENTER + 10, CENTER - R_BALL_TRACK, 12, {
+    ballBody = Bodies.circle(CENTER, CENTER - R_BALL_TRACK, 12, {
         restitution: 0.3,
         friction: 0.1,
-        frictionAir: 0.005,
+        frictionAir: 0.008, // Aumentamos la fricción del aire para la bola.
         label: 'ball'
     });
     World.add(world, ballBody);
     
     // Aplicamos fuerzas iniciales.
-    Body.setAngularVelocity(wheelBody, 0.1); // Velocidad angular a la ruleta.
-    // CORRECCIÓN: Reducimos la velocidad inicial para que no se salga de la pista.
-    Body.setVelocity(ballBody, { x: -8, y: 0 }); // Velocidad lineal a la bola.
+    // Aumentamos la velocidad angular de la ruleta para un giro más rápido.
+    Body.setAngularVelocity(wheelBody, 0.3);
+    
+    // Aumentamos la velocidad inicial de la bola.
+    Body.setVelocity(ballBody, { x: -12, y: 0 });
 }
 
 function guideWheelToWinner() {
@@ -325,8 +337,21 @@ function guideWheelToWinner() {
     if (angleDifference < -Math.PI) angleDifference += 2 * Math.PI;
 
     // Aplicamos una fuerza de torsión correctiva muy pequeña.
-    const correctionForce = angleDifference * 0.0005;
+    const correctionForce = angleDifference * 0.0008;
     wheelBody.torque = correctionForce;
+}
+
+function guideBallToFinalPosition() {
+    // Esta función mueve la bola a su posición final sobre el número ganador.
+    const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
+    const targetAngle = -(winnerIndex * anglePerSlice) - (anglePerSlice / 2);
+
+    // Calculamos la posición XY del centro del número ganador.
+    const finalX = CENTER + Math.cos(targetAngle) * R_NUMBERS;
+    const finalY = CENTER + Math.sin(targetAngle) * R_NUMBERS;
+
+    // Movemos la bola a esa posición.
+    Body.setPosition(ballBody, { x: finalX, y: finalY });
 }
 
 // -----------------------------------------------------------
