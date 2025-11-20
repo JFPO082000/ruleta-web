@@ -250,7 +250,7 @@ function initPhysics() {
         if (!spinning) return;
 
         // Fuerza que atrae la bola al centro (simula la caída).
-        const pullForce = 0.0003;
+        const pullForce = 0.0005; // Aumentamos la fuerza para que la bola caiga de forma más natural.
         const vector = { x: CENTER - ballBody.position.x, y: CENTER - ballBody.position.y };
         const normalized = Matter.Vector.normalise(vector);
         const force = { x: normalized.x * pullForce, y: normalized.y * pullForce };
@@ -302,17 +302,19 @@ function initPhysics() {
 
 function startPhysicsSpin() {
     // Creamos la bola en su posición inicial.
-    ballBody = Bodies.circle(CENTER, CENTER - R_BALL_TRACK, 12, {
+    // CORRECCIÓN: La creamos un poco a la derecha para que la velocidad inicial la ponga en órbita.
+    ballBody = Bodies.circle(CENTER + 10, CENTER - R_BALL_TRACK, 12, {
         restitution: 0.3,
         friction: 0.1,
         frictionAir: 0.005,
         label: 'ball'
     });
     World.add(world, ballBody);
-
+    
     // Aplicamos fuerzas iniciales.
     Body.setAngularVelocity(wheelBody, 0.15); // Velocidad angular a la ruleta.
-    Body.setVelocity(ballBody, { x: -12, y: 0 }); // Velocidad lineal a la bola.
+    // CORRECCIÓN: Reducimos la velocidad inicial para que no se salga de la pista.
+    Body.setVelocity(ballBody, { x: -8, y: 0 }); // Velocidad lineal a la bola.
 }
 
 function guideWheelToWinner() {
