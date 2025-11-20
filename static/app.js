@@ -1,392 +1,359 @@
-// -----------------------------------------------------------
-// 🔵 RULETA EUROPEA – CLIENTE SINCRONIZADO CON BACKEND
-// -----------------------------------------------------------
-
-// Números de la ruleta en orden. Ahora se inicializan aquí
-// para que la ruleta se dibuje al cargar la página.
-let WHEEL_ORDER = [
-    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6,
-    27, 13, 36, 11, 30, 8, 23, 10, 5, 24,
-    16, 33, 1, 20, 14, 31, 9, 22, 18, 29,
-    7, 28, 12, 35, 3, 26
+/* -----------------------------------------------------------
+   CONFIGURACIÓN INICIAL Y CONSTANTES
+----------------------------------------------------------- */
+const WHEEL_NUMBERS = [
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24,
+    16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
 ];
+const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+const NUMBER_OF_SECTORS = WHEEL_NUMBERS.length;
+const SECTOR_ANGLE = (2 * Math.PI) / NUMBER_OF_SECTORS;
 
-// Coordenadas
-const CENTER = 230;
-const R_WHEEL = 210;
+const CHIP_VALUES = [1, 5, 10, 25, 100, 500];
 
-// Radios de la bola para el efecto de "caída"
-const R_BALL_START = 195; // Radio inicial, en el borde exterior
-const R_BALL_END = 150;   // Radio final, ajustado para no superponerse a los números
+const rouletteCanvas = document.getElementById('rouletteCanvas');
+const ballCanvas = document.getElementById('ballCanvas');
+const ctxRoulette = rouletteCanvas.getContext('2d');
+const ctxBall = ballCanvas.getContext('2d');
 
-// Velocidades naturales
-const INITIAL_WHEEL_SPEED = 0.22; // Positivo: Ruleta gira en sentido horario
-const INITIAL_BALL_SPEED = -0.82;  // Negativo: Bola gira en sentido antihorario
+const btnSpin = document.getElementById('btnSpin');
+const btnAuto = document.getElementById('btnAuto');
+const resultText = document.getElementById('resultText');
+const balanceEl = document.getElementById('balance');
+const historyEl = document.getElementById('history');
+const chipsRow = document.getElementById('chipsRow');
+const canvasWrapper = document.getElementById('canvasWrapper');
+const panel = document.querySelector('.panel');
 
-const FRICTION_WHEEL = 0.9925;
-const FRICTION_BALL = 0.99;
-
-// -----------------------------------------------------------
-// CANVAS
-// -----------------------------------------------------------
-const rouletteCanvas = document.getElementById("rouletteCanvas");
-const ctx = rouletteCanvas.getContext("2d");
-
-const rgbCanvas = document.getElementById("rgbCanvas");
-const rgbCtx = rgbCanvas.getContext("2d");
-
-const ballCanvas = document.getElementById("ballCanvas");
-const ballCtx = ballCanvas.getContext("2d");
-
-rouletteCanvas.width = rouletteCanvas.height = 460;
-rgbCanvas.width = rgbCanvas.height = 460;
-ballCanvas.width = ballCanvas.height = 460;
-
-// Estado
-const sounds = {
-    click: new Audio('/static/sounds/click.wav'),
-    win: new Audio('/static/sounds/win.wav'),
-    lose: new Audio('/static/sounds/lose.wav')
-};
+let balance = 1000;
+let selectedBet = 10;
+let selectedColor = 'rojo';
+let isSpinning = false;
+let isAutoSpin = false;
+let history = [];
 
 let wheelAngle = 0;
-let ballAngle = 0;
-let ballRadius = R_BALL_START; // El radio de la bola ahora es variable
-let spinning = false;
+let ballAngle = Math.random() * 2 * Math.PI;
+let ballRadius = 180;
+let ballVelocity = 0;
 
-let saldo = 1000;
-let selectedColor = null;
-let selectedBet = null;
-let autoSpin = false;
+/* -----------------------------------------------------------
+   INICIALIZACIÓN Y DIBUJO
+----------------------------------------------------------- */
 
-let winnerIndex = null;
-let winnerNumber = null;
-let winnerColor = null;
-let lastWinAmount = 0;
+function getColorOf(n) {
+    if (n === 0) return 'verde';
+    return RED_NUMBERS.includes(n) ? 'rojo' : 'negro';
+}
 
-// -----------------------------------------------------------
-// DOM CORRECTO PARA TU HTML
-// -----------------------------------------------------------
-const saldoSpan = document.getElementById("balance");
-const historySpan = document.getElementById("history");
-const resultDiv = document.getElementById("resultText");
+function drawWheel() {
+    const radius = rouletteCanvas.width / 2;
+    ctxRoulette.clearRect(0, 0, rouletteCanvas.width, rouletteCanvas.height);
+    ctxRoulette.save();
+    ctxRoulette.translate(radius, radius);
+    ctxRoulette.rotate(wheelAngle);
 
-document.getElementById("btnRojo").onclick = () => selectColor("rojo");
-document.getElementById("btnNegro").onclick = () => selectColor("negro");
-document.getElementById("btnVerde").onclick = () => selectColor("verde");
+    for (let i = 0; i < NUMBER_OF_SECTORS; i++) {
+        const angle = i * SECTOR_ANGLE;
+        const number = WHEEL_NUMBERS[i];
+        const color = getColorOf(number);
 
-document.getElementById("btnSpin").onclick = () => spin(false);
-document.getElementById("btnAuto").onclick = toggleAuto;
+        ctxRoulette.beginPath();
+        ctxRoulette.moveTo(0, 0);
+        ctxRoulette.arc(0, 0, radius - 10, angle - SECTOR_ANGLE / 2, angle + SECTOR_ANGLE / 2);
+        ctxRoulette.closePath();
 
-generateChips();
+        if (color === 'rojo') ctxRoulette.fillStyle = '#d00000';
+        else if (color === 'negro') ctxRoulette.fillStyle = '#222';
+        else ctxRoulette.fillStyle = '#0bb400';
+        ctxRoulette.fill();
 
-// -----------------------------------------------------------
-// GENERAR FICHAS
-// -----------------------------------------------------------
-function generateChips() {
-    const values = [5, 10, 25, 50, 100, 200, 500];
-    const container = document.getElementById("chipsRow");
-    container.innerHTML = "";
+        ctxRoulette.save();
+        ctxRoulette.rotate(angle);
+        ctxRoulette.textAlign = 'center';
+        ctxRoulette.fillStyle = '#fff';
+        ctxRoulette.font = 'bold 18px Arial';
+        ctxRoulette.fillText(number, radius - 30, 0);
+        ctxRoulette.restore();
+    }
+    ctxRoulette.restore();
+}
 
-    values.forEach(v => {
-        const b = document.createElement("button");
-        b.className = "chip-btn";
-        b.dataset.value = v;
-        b.textContent = "$" + v;
-        b.onclick = () => selectBet(v);
-        container.appendChild(b);
+function drawBall() {
+    const radius = ballCanvas.width / 2;
+    ctxBall.clearRect(0, 0, ballCanvas.width, ballCanvas.height);
+    ctxBall.save();
+    ctxBall.translate(radius, radius);
+
+    const ballX = ballRadius * Math.cos(ballAngle);
+    const ballY = ballRadius * Math.sin(ballAngle);
+
+    ctxBall.beginPath();
+    ctxBall.arc(ballX, ballY, 8, 0, 2 * Math.PI);
+    ctxBall.fillStyle = '#ffffff';
+    ctxBall.fill();
+    ctxBall.strokeStyle = '#cccccc';
+    ctxBall.lineWidth = 2;
+    ctxBall.stroke();
+
+    ctxBall.restore();
+}
+
+function updateUI() {
+    balanceEl.textContent = `$${balance}`;
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.color === selectedColor);
+    });
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.classList.toggle('selected', parseInt(btn.dataset.value) === selectedBet);
     });
 }
 
-// -----------------------------------------------------------
-// SELECCIÓN COLOR Y APUESTA
-// -----------------------------------------------------------
-function selectColor(c) {
-    document.querySelectorAll(".color-btn")
-        .forEach(b => b.classList.remove("selected"));
-
-    document.querySelector(`[data-color="${c}"]`).classList.add("selected");
-
-    selectedColor = c;
-    updateMessage();
+function createChips() {
+    CHIP_VALUES.forEach(value => {
+        const chip = document.createElement('button');
+        chip.className = 'chip-btn';
+        chip.dataset.value = value;
+        chip.textContent = `$${value}`;
+        chip.onclick = () => {
+            if (isSpinning) return;
+            selectedBet = value;
+            updateUI();
+        };
+        chipsRow.appendChild(chip);
+    });
 }
 
-function selectBet(v) {
-    selectedBet = v;
+/* -----------------------------------------------------------
+   LÓGICA DE ANIMACIÓN Y GIRO
+----------------------------------------------------------- */
 
-    document.querySelectorAll(".chip-btn")
-        .forEach(b => b.classList.remove("selected"));
-
-    [...document.querySelectorAll(".chip-btn")]
-        .find(b => b.dataset.value == v)
-        .classList.add("selected");
-
-    updateMessage();
-}
-
-// -----------------------------------------------------------
-// MENSAJES
-// -----------------------------------------------------------
-function updateMessage(msg = null) {
-    if (msg) return resultDiv.textContent = msg;
-
-    if (!selectedColor && !selectedBet) resultDiv.textContent = "Selecciona color y apuesta…";
-    else if (!selectedColor) resultDiv.textContent = "Selecciona un color…";
-    else if (!selectedBet) resultDiv.textContent = "Selecciona una ficha…";
-    else resultDiv.textContent = `Apuesta lista: ${selectedColor.toUpperCase()} $${selectedBet}`;
-}
-
-// -----------------------------------------------------------
-// SPIN – LLAMADA AL BACKEND
-// -----------------------------------------------------------
-function spin(fromAuto) {
-    if (spinning) return;
-
-    if (!selectedColor || !selectedBet) return updateMessage();
-
-    if (saldo < selectedBet) {
-        updateMessage("Saldo insuficiente.");
-        autoSpin = false;
-        document.getElementById("btnAuto").textContent = "AUTO SPIN: OFF";
+function spin() {
+    if (isSpinning) return;
+    if (balance < selectedBet) {
+        resultText.textContent = "Saldo insuficiente.";
         return;
     }
 
-    spinning = true;
-    updateMessage("Girando…");
-    
-    // Deshabilitar botones durante el giro
-    document.getElementById("btnSpin").disabled = true;
-    document.getElementById("btnAuto").disabled = true;
+    isSpinning = true;
+    resultText.textContent = "Girando...";
+    btnSpin.disabled = true;
+    panel.classList.remove('win-effect', 'lose-effect');
+    balanceEl.classList.remove('win-effect', 'lose-effect');
 
-    fetch("/api/spin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    fetch('/api/spin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            balance: saldo,
+            balance: balance,
             bet: selectedBet,
             color: selectedColor
         })
     })
-    .then(r => r.json())
+    .then(response => response.json())
     .then(data => {
         if (data.error) {
-            spinning = false;
-            updateMessage(data.error);
+            resultText.textContent = data.error;
+            isSpinning = false;
+            btnSpin.disabled = false;
             return;
         }
-
-        winnerIndex = data.index;
-        winnerNumber = data.number;
-        winnerColor = data.color;
-        lastWinAmount = data.win;
-        saldo = data.newBalance;
-        saldoSpan.textContent = "$" + saldo;
-
-        animateSpin();
+        animateToResult(data);
     })
-    .catch(() => {
-        spinning = false;
-        updateMessage("Error de conexión.");
+    .catch(error => {
+        console.error('Error en la API:', error);
+        resultText.textContent = "Error de conexión. Inténtalo de nuevo.";
+        isSpinning = false;
+        btnSpin.disabled = false;
     });
 }
 
-// -----------------------------------------------------------
-// ANIMACIÓN REALISTA
-// -----------------------------------------------------------
-function animateSpin() {
-    let wheelSpeed = INITIAL_WHEEL_SPEED;
-    let ballSpeed = INITIAL_BALL_SPEED;
+function animateToResult(result) {
+    const { index, number, color, win, newBalance } = result;
 
-    // Reiniciar la posición de la bola para la nueva animación
-    ballAngle = 0;
-    ballRadius = R_BALL_START;
-    drawBall();
+    const targetAngle = -(index * SECTOR_ANGLE) - SECTOR_ANGLE / 2;
+    const fullSpins = 5;
+    const totalRotation = (fullSpins * 2 * Math.PI) + targetAngle;
 
-    // --- LÓGICA DE ANIMACIÓN REALISTA ---
-    // 1. Calcular cuántos fotogramas tardará la bola en detenerse.
-    let ballFrames = 0;
-    let tempSpeed = INITIAL_BALL_SPEED;
-    while (Math.abs(tempSpeed) > 0.001) { // Umbral de detención
-        tempSpeed *= FRICTION_BALL;
-        ballFrames++;
-    }
+    const duration = 6000; // Duración total de 6 segundos
+    const zoomInTime = duration * 0.5; // El zoom empieza a mitad de camino
+    const slowDownTime = duration * 0.8; // La bola empieza a frenar en el 80% del tiempo
+    let startTime = null;
 
-    // 2. Calcular el ángulo final de la bola después de esos fotogramas.
-    function frame() {
-        wheelAngle += wheelSpeed;
-        ballAngle += ballSpeed;
+    // Velocidad inicial de la bola
+    ballVelocity = 0.2;
+    ballRadius = 180;
 
-        wheelSpeed *= FRICTION_WHEEL;
-        ballSpeed *= FRICTION_BALL;
+    function animationStep(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = timestamp - startTime;
 
-        // La bola "cae" hacia el centro a medida que pierde velocidad
-        const speedRatio = Math.max(0, Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED));
-        ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * speedRatio;
+        // --- Animación de la ruleta ---
+        const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
+        const wheelProgress = Math.min(progress / duration, 1);
+        wheelAngle = easeOutQuint(wheelProgress) * totalRotation;
 
-        // --- SONIDO DE CLIC ---
-        // Reproduce un clic basado en la velocidad de la bola
-        if (speedRatio > 0.1 && Math.abs(ballSpeed) > Math.abs(wheelSpeed)) {
-             // El % 0.1 simula la frecuencia de paso por las casillas
-            if (Math.abs(ballAngle % 0.1) < 0.01) sounds.click.play();
+        // --- Animación de la bola ---
+        ballAngle += ballVelocity;
+
+        // La bola empieza a frenar y a caer hacia el centro
+        if (progress > slowDownTime) {
+            const slowDownProgress = (progress - slowDownTime) / (duration - slowDownTime);
+            ballVelocity = Math.max(0, 0.2 * (1 - easeOutQuint(slowDownProgress)));
+            ballRadius = 180 - 100 * easeOutQuint(slowDownProgress); // Cae hacia el centro
+        }
+
+        // --- Efecto de zoom ---
+        if (progress > zoomInTime) {
+            canvasWrapper.classList.add('zoomed');
         }
 
         drawWheel();
         drawBall();
 
-        // --- GUIADO SUAVE HACIA EL RESULTADO ---
-        // A medida que la bola pierde velocidad, aplicamos una fuerza de corrección
-        // para que la ruleta se alinee con el número ganador.
-        const targetAngle = ballAngle - (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) + Math.PI / 2;
-        const angleDifference = targetAngle - wheelAngle;
-        
-        // La fuerza de corrección es mayor cuanto más lenta es la bola.
-        const correctionForce = (1 - speedRatio) * 0.003; 
-        wheelAngle += angleDifference * correctionForce;
+        if (progress < duration) {
+            requestAnimationFrame(animationStep);
+        } else {
+            // Fin de la animación
+            wheelAngle = targetAngle; // Clavar el ángulo final
+            ballAngle = targetAngle + wheelAngle; // Alinear la bola con el número
+            ballRadius = 80; // Posición final de la bola en el número
+            drawWheel();
+            drawBall();
 
-        // Cuando la bola se detiene, ajustamos la ruleta a su posición final y rebotamos.
-        if (Math.abs(ballSpeed) < 0.001) {
-            // Aseguramos la posición final y comenzamos el rebote.
-            wheelAngle = targetAngle;
-            bounceBall(ballAngle);
-            return; // Detenemos este bucle de animación.
+            finishSpin(result);
         }
-
-        requestAnimationFrame(frame);
     }
 
-    requestAnimationFrame(frame);
+    requestAnimationFrame(animationStep);
 }
 
+function finishSpin(result) {
+    const { number, color, win, newBalance } = result;
 
-// -----------------------------------------------------------
-// REBOTE REALISTA FINAL
-// -----------------------------------------------------------
-function bounceBall(finalAngle) {
-    const amp = 0.05;
-    const bounces = 10;
-    const duration = 700;
-    const start = performance.now();
+    balance = newBalance;
+    updateUI();
 
-    function bounce(now) {
-        let t = (now - start) / duration;
-        if (t > 1) t = 1;
-
-        const decay = 1 - t;
-        const offset = Math.sin(t * bounces * Math.PI) * amp * decay;
-
-        ballAngle = finalAngle + offset;
-
-        drawWheel();
-        drawBall();
-
-        if (t < 1) requestAnimationFrame(bounce);
-        else showResult();
-    }
-
-    requestAnimationFrame(bounce);
-}
-
-// -----------------------------------------------------------
-// MOSTRAR RESULTADO FINAL
-// -----------------------------------------------------------
-function showResult() {
-    spinning = false;
-
-    // Habilitar botones de nuevo
-    document.getElementById("btnSpin").disabled = false;
-    document.getElementById("btnAuto").disabled = false;
-
-    // Crear un span para el nuevo número del historial con su color
-    const historyEntry = document.createElement('span');
-    historyEntry.textContent = winnerNumber;
-    historyEntry.className = `history-entry color-${winnerColor}`;
-    
-    // Añadirlo al principio del historial
-    historySpan.prepend(historyEntry);
-
-    if (lastWinAmount > 0) {
-        updateMessage(`¡GANASTE! Número ${winnerNumber} (${winnerColor}) +$${lastWinAmount}`);
-        sounds.win.play();
+    if (win > 0) {
+        resultText.textContent = `¡Ganaste $${win}! Salió ${number} ${color}.`;
+        panel.classList.add('win-effect');
+        balanceEl.classList.add('win-effect');
     } else {
-        updateMessage(`Perdiste. Número ${winnerNumber} (${winnerColor}) -$${selectedBet}`);
+        resultText.textContent = `Perdiste. Salió ${number} ${color}.`;
+        panel.classList.add('lose-effect');
+        balanceEl.classList.add('lose-effect');
     }
 
-    if (autoSpin && saldo >= selectedBet) {
-        setTimeout(() => spin(true), 1500);
-    } else if (autoSpin) {
-        toggleAuto(); // Apagar si no hay saldo
-        updateMessage("Auto-spin detenido. Saldo insuficiente.");
+    updateHistory(number, color);
+
+    setTimeout(() => {
+        isSpinning = false;
+        btnSpin.disabled = false;
+        canvasWrapper.classList.remove('zoomed');
+        if (isAutoSpin) {
+            spin();
+        } else {
+            resultText.textContent = "Selecciona color y apuesta…";
+        }
+    }, 2500);
+}
+
+function updateHistory(number, colorName) {
+    history.unshift({ number, colorName });
+    if (history.length > 10) {
+        history.pop();
     }
+
+    historyEl.innerHTML = '';
+    history.forEach(entry => {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = `history-entry color-${entry.colorName}`;
+        entryDiv.textContent = entry.number;
+        historyEl.appendChild(entryDiv);
+    });
 }
 
-// -----------------------------------------------------------
-// AUTO SPIN
-// -----------------------------------------------------------
-function toggleAuto() {
-    autoSpin = !autoSpin;
-    document.getElementById("btnAuto").textContent = `AUTO SPIN: ${autoSpin ? "ON" : "OFF"}`;
-    if (autoSpin && !spinning) spin(true);
-}
+/* -----------------------------------------------------------
+   MANEJADORES DE EVENTOS
+----------------------------------------------------------- */
 
-// -----------------------------------------------------------
-// DIBUJAR RULETA
-// -----------------------------------------------------------
-function drawWheel() {
-    ctx.clearRect(0,0,460,460);
+document.querySelectorAll('.color-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (isSpinning) return;
+        selectedColor = btn.dataset.color;
+        updateUI();
+    });
+});
 
-    const slices = WHEEL_ORDER.length;
-    const anglePerSlice = (Math.PI * 2) / slices;
+btnSpin.addEventListener('click', spin);
 
-    for (let i = 0; i < slices; i++) {
-
-        const start = wheelAngle + i * anglePerSlice - Math.PI / 2;
-        const end   = start + anglePerSlice;
-
-        const num = WHEEL_ORDER[i];
-        const col =
-            num === 0 ? "#0bb400" :
-            // Corrección: Usar la misma lista de rojos que el backend
-            [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36].includes(num)
-            ? "#d00000" : "#000";
-
-        // sector
-        ctx.beginPath();
-        ctx.moveTo(CENTER, CENTER);
-        ctx.arc(CENTER, CENTER, R_WHEEL, start, end);
-        ctx.closePath();
-        ctx.fillStyle = col;
-        ctx.fill();
-
-        // número
-        ctx.save();
-        ctx.translate(CENTER, CENTER);
-        ctx.rotate(start + anglePerSlice / 2);
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 20px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(num, R_WHEEL - 36, 8);
-        ctx.restore();
+btnAuto.addEventListener('click', () => {
+    isAutoSpin = !isAutoSpin;
+    btnAuto.textContent = `AUTO SPIN: ${isAutoSpin ? 'ON' : 'OFF'}`;
+    btnAuto.classList.toggle('active', isAutoSpin); // Puedes añadir estilos para .active
+    if (isAutoSpin && !isSpinning) {
+        spin();
     }
+});
+
+/* -----------------------------------------------------------
+   INICIALIZACIÓN
+----------------------------------------------------------- */
+
+function init() {
+    // Bucle de animación base para cuando no está girando
+    function idleAnimation() {
+        if (!isSpinning) {
+            drawWheel();
+            drawBall();
+        }
+        requestAnimationFrame(idleAnimation);
+    }
+
+    createChips();
+    updateUI();
+    idleAnimation();
+
+    // Seleccionar rojo y $10 por defecto
+    document.querySelector('.color-btn[data-color="rojo"]').classList.add('selected');
+    document.querySelector('.chip-btn[data-value="10"]').classList.add('selected');
 }
 
-// -----------------------------------------------------------
-// DIBUJAR BOLA
-// -----------------------------------------------------------
-function drawBall() {
-    ballCtx.clearRect(0,0,460,460);
+init();
 
-    const x = CENTER + Math.cos(ballAngle) * ballRadius;
-    const y = CENTER + Math.sin(ballAngle) * ballRadius;
 
-    ballCtx.beginPath();
-    ballCtx.arc(x, y, 12, 0, Math.PI * 2);
-    ballCtx.fillStyle = "#fff";
-    ballCtx.fill();
+/* -----------------------------------------------------------
+   EFECTO RGB EN EL BORDE (OPCIONAL)
+----------------------------------------------------------- */
+const rgbCanvas = document.getElementById('rgbCanvas');
+const ctxRgb = rgbCanvas.getContext('2d');
+let hue = 0;
+
+function drawRgbGlow() {
+    const radius = rgbCanvas.width / 2;
+    const gradient = ctxRgb.createConicGradient(0, radius, radius);
+
+    for (let i = 0; i <= 360; i += 30) {
+        const color = `hsl(${(hue + i) % 360}, 100%, 50%)`;
+        gradient.addColorStop(i / 360, color);
+    }
+
+    ctxRgb.clearRect(0, 0, rgbCanvas.width, rgbCanvas.height);
+    ctxRgb.save();
+    ctxRgb.translate(radius, radius);
+    ctxRgb.rotate(Date.now() / 1000); // Rotación suave
+
+    ctxRgb.beginPath();
+    ctxRgb.arc(0, 0, radius, 0, 2 * Math.PI);
+    ctxRgb.strokeStyle = gradient;
+    ctxRgb.lineWidth = 6; // Ancho del borde RGB
+    ctxRgb.filter = 'blur(10px)'; // Efecto de desenfoque para el glow
+    ctxRgb.stroke();
+
+    ctxRgb.restore();
+
+    hue = (hue + 1) % 360;
+    requestAnimationFrame(drawRgbGlow);
 }
 
-// -----------------------------------------------------------
-// INICIAR DIBUJOS
-// -----------------------------------------------------------
-drawWheel();
-drawBall();
-updateMessage();
+drawRgbGlow();
