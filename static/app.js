@@ -240,10 +240,8 @@ function animateSpin() {
 
         // Cuando la bola se detiene, ajustamos la ruleta a su posición final y rebotamos.
         if (Math.abs(ballSpeed) < 0.001) {
-            wheelAngle = targetWheelAngle; // Ajuste final y preciso de la ruleta
-            ballAngle = finalBallAngle;   // Ajuste final de la bola
-            bounceBall(finalBallAngle);
-            return;
+            // En lugar de saltar, iniciamos una animación suave hacia el objetivo.
+            return guideToTarget(wheelAngle, ballAngle, targetWheelAngle, finalBallAngle);
         }
 
         requestAnimationFrame(frame);
@@ -251,6 +249,41 @@ function animateSpin() {
 
     requestAnimationFrame(frame);
 }
+
+// -----------------------------------------------------------
+// GUIADO SUAVE HACIA EL RESULTADO FINAL
+// -----------------------------------------------------------
+function guideToTarget(currentWheelAngle, currentBallAngle, targetWheelAngle, targetBallAngle) {
+    const duration = 800; // Duración de la animación de guiado en ms
+    const start = performance.now();
+
+    function guideFrame(now) {
+        let t = (now - start) / duration;
+        if (t > 1) t = 1;
+
+        // Usamos una función de easing para que el movimiento sea más suave (ease-out)
+        const easedT = 1 - Math.pow(1 - t, 3);
+
+        // Interpolamos los ángulos desde la posición actual a la final
+        wheelAngle = currentWheelAngle + (targetWheelAngle - currentWheelAngle) * easedT;
+        ballAngle = currentBallAngle + (targetBallAngle - currentBallAngle) * easedT;
+
+        drawWheel();
+        drawBall();
+
+        if (t < 1) {
+            requestAnimationFrame(guideFrame);
+        } else {
+            // Una vez que la ruleta está en su sitio, iniciamos el rebote final de la bola
+            wheelAngle = targetWheelAngle; // Aseguramos la posición final exacta
+            ballAngle = targetBallAngle;
+            bounceBall(targetBallAngle);
+        }
+    }
+
+    requestAnimationFrame(guideFrame);
+}
+
 
 // -----------------------------------------------------------
 // REBOTE REALISTA FINAL
