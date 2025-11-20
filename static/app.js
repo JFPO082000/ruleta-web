@@ -1,520 +1,386 @@
-/* -----------------------------------------------------------
-   CONFIGURACIÓN INICIAL Y CONSTANTES
------------------------------------------------------------ */
+// -----------------------------------------------------------
+// 🔵 RULETA EUROPEA – CLIENTE SINCRONIZADO CON BACKEND
+// -----------------------------------------------------------
 
-// Array que representa el orden de los números en una ruleta europea.
-const WHEEL_NUMBERS = [
-    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24,
-    16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+// Números de la ruleta en orden. Ahora se inicializan aquí
+// para que la ruleta se dibuje al cargar la página.
+let WHEEL_ORDER = [
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6,
+    27, 13, 36, 11, 30, 8, 23, 10, 5, 24,
+    16, 33, 1, 20, 14, 31, 9, 22, 18, 29,
+    7, 28, 12, 35, 3, 26
 ];
-// Array con todos los números que son de color rojo.
-const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
-// Número total de sectores (casillas) en la ruleta.
-const NUMBER_OF_SECTORS = WHEEL_NUMBERS.length;
-// El ángulo (en radianes) que ocupa cada sector de la ruleta. Se calcula dividiendo el círculo completo (2 * PI) entre el número de sectores.
-const SECTOR_ANGLE = (2 * Math.PI) / NUMBER_OF_SECTORS;
 
-// Valores de las fichas de apuesta disponibles.
-const CHIP_VALUES = [1, 5, 10, 25, 100, 500];
+// Coordenadas
+const CENTER = 230;
+const R_WHEEL = 210;
 
-// --- Constantes de Física (Matter.js) ---
-const Engine = Matter.Engine,
-      Render = Matter.Render, // Render no se usará para dibujar, solo para el motor
-      World = Matter.World,
-      Bodies = Matter.Bodies,
-      Body = Matter.Body,
-      Events = Matter.Events;
+// Radios de la bola para el efecto de "caída"
+const R_BALL_START = 195; // Radio inicial, en el borde exterior
+const R_BALL_END = 150;   // Radio final, ajustado para no superponerse a los números
 
+// Velocidades naturales
+const INITIAL_WHEEL_SPEED = 0.22; // Positivo: Ruleta gira en sentido horario
+const INITIAL_BALL_SPEED = -0.82;  // Negativo: Bola gira en sentido antihorario
 
-// Elementos del DOM (canvas) para la ruleta y la bola.
-const rouletteCanvas = document.getElementById('rouletteCanvas');
-const ballCanvas = document.getElementById('ballCanvas');
-// Contextos 2D de los canvas, usados para dibujar.
-const ctxRoulette = rouletteCanvas.getContext('2d');
-const ctxBall = ballCanvas.getContext('2d');
+const FRICTION_WHEEL = 0.9925;
+const FRICTION_BALL = 0.985;
 
-// Elementos del DOM para la interacción del usuario (botones, textos, etc.).
-const btnSpin = document.getElementById('btnSpin');
-const btnAuto = document.getElementById('btnAuto');
-const resultText = document.getElementById('resultText');
-const balanceEl = document.getElementById('balance');
-const historyEl = document.getElementById('history');
-const chipsRow = document.getElementById('chipsRow');
-const canvasWrapper = document.getElementById('canvasWrapper');
-const panel = document.querySelector('.panel');
+// -----------------------------------------------------------
+// CANVAS
+// -----------------------------------------------------------
+const rouletteCanvas = document.getElementById("rouletteCanvas");
+const ctx = rouletteCanvas.getContext("2d");
 
-// --- Variables de estado del juego ---
-// Saldo inicial del jugador.
-let balance = 1000;
-// Valor de la apuesta seleccionada por defecto.
-let selectedBet = 10;
-// Color de la apuesta seleccionado por defecto.
-let selectedColor = 'rojo';
-// Booleano que indica si la ruleta está girando.
-let isSpinning = false;
-// Booleano que indica si el modo de giro automático está activado.
-let isAutoSpin = false;
-// Array para almacenar el historial de los últimos resultados.
-let history = [];
+const rgbCanvas = document.getElementById("rgbCanvas");
+const rgbCtx = rgbCanvas.getContext("2d");
 
-// --- Variables de estado de la animación ---
-// Ángulo de rotación actual de la ruleta.
+const ballCanvas = document.getElementById("ballCanvas");
+const ballCtx = ballCanvas.getContext("2d");
+
+rouletteCanvas.width = rouletteCanvas.height = 460;
+rgbCanvas.width = rgbCanvas.height = 460;
+ballCanvas.width = ballCanvas.height = 460;
+
+// Estado
+const sounds = {
+    click: new Audio('/static/sounds/click.wav'),
+    win: new Audio('/static/sounds/win.wav'),
+    lose: new Audio('/static/sounds/lose.wav')
+};
+
 let wheelAngle = 0;
-// Ángulo de posición actual de la bola.
-let ballAngle = Math.random() * 2 * Math.PI;
-// Radio de la órbita de la bola (distancia desde el centro).
-let ballRadius = 180;
-// Velocidad angular de la bola.
-let ballVelocity = 0;
+let ballAngle = 0;
+let ballRadius = R_BALL_START; // El radio de la bola ahora es variable
+let spinning = false;
 
-// --- Variables de Física ---
-let engine;
-let world;
-let ball;
-let pockets = [];
-let isPhysicsRunning = false;
+let saldo = 1000;
+let selectedColor = null;
+let selectedBet = null;
+let autoSpin = false;
 
-/* -----------------------------------------------------------
-   INICIALIZACIÓN Y DIBUJO
------------------------------------------------------------ */
+let winnerIndex = null;
+let winnerNumber = null;
+let winnerColor = null;
+let lastWinAmount = 0;
 
-function getColorOf(n) {
-    // Devuelve el color ('verde', 'rojo', 'negro') de un número dado.
-    if (n === 0) return 'verde';
-    return RED_NUMBERS.includes(n) ? 'rojo' : 'negro';
-}
+// -----------------------------------------------------------
+// DOM CORRECTO PARA TU HTML
+// -----------------------------------------------------------
+const saldoSpan = document.getElementById("balance");
+const historySpan = document.getElementById("history");
+const resultDiv = document.getElementById("resultText");
 
-/**
- * Dibuja la ruleta en su canvas.
- * Esta función se llama en cada frame de la animación para actualizar la rotación.
- */
-function drawWheel() {
-    // Obtiene el radio del canvas (la mitad de su ancho).
-    const radius = rouletteCanvas.width / 2;
-    // Limpia el canvas antes de volver a dibujar.
-    ctxRoulette.clearRect(0, 0, rouletteCanvas.width, rouletteCanvas.height);
-    ctxRoulette.save();
-    // Mueve el origen del contexto al centro del canvas para facilitar la rotación.
-    ctxRoulette.translate(radius, radius);
-    // Rota el canvas de la ruleta según el ángulo actual.
-    ctxRoulette.rotate(wheelAngle);
+document.getElementById("btnRojo").onclick = () => selectColor("rojo");
+document.getElementById("btnNegro").onclick = () => selectColor("negro");
+document.getElementById("btnVerde").onclick = () => selectColor("verde");
 
-    for (let i = 0; i < NUMBER_OF_SECTORS; i++) {
-        const angle = i * SECTOR_ANGLE;
-        const number = WHEEL_NUMBERS[i];
-        const color = getColorOf(number);
+document.getElementById("btnSpin").onclick = () => spin(false);
+document.getElementById("btnAuto").onclick = toggleAuto;
 
-        // Dibuja el sector (la "porción de tarta").
-        ctxRoulette.beginPath();
-        ctxRoulette.moveTo(0, 0);
-        ctxRoulette.arc(0, 0, radius - 10, angle - SECTOR_ANGLE / 2, angle + SECTOR_ANGLE / 2);
-        ctxRoulette.closePath();
+generateChips();
 
-        // Asigna el color de relleno según el número.
-        if (color === 'rojo') ctxRoulette.fillStyle = '#d00000';
-        else if (color === 'negro') ctxRoulette.fillStyle = '#222';
-        else ctxRoulette.fillStyle = '#0bb400';
-        ctxRoulette.fill();
+// -----------------------------------------------------------
+// GENERAR FICHAS
+// -----------------------------------------------------------
+function generateChips() {
+    const values = [5, 10, 25, 50, 100, 200, 500];
+    const container = document.getElementById("chipsRow");
+    container.innerHTML = "";
 
-        // Dibuja el número dentro del sector.
-        ctxRoulette.save();
-        ctxRoulette.rotate(angle);
-        ctxRoulette.textAlign = 'center';
-        ctxRoulette.fillStyle = '#fff';
-        ctxRoulette.font = 'bold 18px Arial';
-        ctxRoulette.fillText(number, radius - 30, 0);
-        ctxRoulette.restore();
-    }
-    // Restaura el estado del contexto (deshace la traslación y rotación).
-    ctxRoulette.restore();
-}
-
-/**
- * Dibuja la bola en su canvas.
- * Se llama en cada frame para actualizar la posición de la bola.
- */
-function drawBall() {
-    const radius = ballCanvas.width / 2;
-    // Limpia el canvas de la bola.
-    ctxBall.clearRect(0, 0, ballCanvas.width, ballCanvas.height);
-    ctxBall.save();
-    // Mueve el origen al centro.
-    ctxBall.translate(radius, radius);
-
-    // Si la simulación física está activa, dibuja la bola según la posición del motor de física.
-    if (isPhysicsRunning && ball) {
-        ctxBall.beginPath();
-        ctxBall.arc(ball.position.x, ball.position.y, 8, 0, 2 * Math.PI);
-        ctxBall.fillStyle = '#ffffff';
-        ctxBall.fill();
-        ctxBall.strokeStyle = '#cccccc';
-        ctxBall.lineWidth = 2;
-        ctxBall.stroke();
-    }
-    // Restaura el estado del contexto.
-    ctxBall.restore();
-}
-
-/**
- * Actualiza los elementos de la interfaz de usuario (saldo, botones seleccionados).
- */
-function updateUI() {
-    // Actualiza el texto del saldo.
-    balanceEl.textContent = `$${balance}`;
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.color === selectedColor);
-    });
-    document.querySelectorAll('.chip-btn').forEach(btn => {
-        btn.classList.toggle('selected', parseInt(btn.dataset.value) === selectedBet);
+    values.forEach(v => {
+        const b = document.createElement("button");
+        b.className = "chip-btn";
+        b.dataset.value = v;
+        b.textContent = "$" + v;
+        b.onclick = () => selectBet(v);
+        container.appendChild(b);
     });
 }
 
-/**
- * Crea los botones de las fichas de apuesta y los añade al DOM.
- */
-function createChips() {
-    CHIP_VALUES.forEach(value => {
-        const chip = document.createElement('button');
-        chip.className = 'chip-btn';
-        chip.dataset.value = value;
-        chip.textContent = `$${value}`;
-        chip.onclick = () => {
-            if (isSpinning) return;
-            selectedBet = value;
-            updateUI();
-        };
-        chipsRow.appendChild(chip);
-    });
+// -----------------------------------------------------------
+// SELECCIÓN COLOR Y APUESTA
+// -----------------------------------------------------------
+function selectColor(c) {
+    document.querySelectorAll(".color-btn")
+        .forEach(b => b.classList.remove("selected"));
+
+    document.querySelector(`[data-color="${c}"]`).classList.add("selected");
+
+    selectedColor = c;
+    updateMessage();
 }
 
-/* -----------------------------------------------------------
-   LÓGICA DE ANIMACIÓN Y GIRO
------------------------------------------------------------ */
+function selectBet(v) {
+    selectedBet = v;
 
-/**
- * Inicia el proceso de giro de la ruleta.
- */
-function spin() {
-    // No hacer nada si ya está girando.
-    if (isSpinning) return;
-    // Comprobar si el jugador tiene saldo suficiente.
-    if (balance < selectedBet) {
-        resultText.textContent = "Saldo insuficiente.";
+    document.querySelectorAll(".chip-btn")
+        .forEach(b => b.classList.remove("selected"));
+
+    [...document.querySelectorAll(".chip-btn")]
+        .find(b => b.dataset.value == v)
+        .classList.add("selected");
+
+    updateMessage();
+}
+
+// -----------------------------------------------------------
+// MENSAJES
+// -----------------------------------------------------------
+function updateMessage(msg = null) {
+    if (msg) return resultDiv.textContent = msg;
+
+    if (!selectedColor && !selectedBet) resultDiv.textContent = "Selecciona color y apuesta…";
+    else if (!selectedColor) resultDiv.textContent = "Selecciona un color…";
+    else if (!selectedBet) resultDiv.textContent = "Selecciona una ficha…";
+    else resultDiv.textContent = `Apuesta lista: ${selectedColor.toUpperCase()} $${selectedBet}`;
+}
+
+// -----------------------------------------------------------
+// SPIN – LLAMADA AL BACKEND
+// -----------------------------------------------------------
+function spin(fromAuto) {
+    if (spinning) return;
+
+    if (!selectedColor || !selectedBet) return updateMessage();
+
+    if (saldo < selectedBet) {
+        updateMessage("Saldo insuficiente.");
+        autoSpin = false;
+        document.getElementById("btnAuto").textContent = "AUTO SPIN: OFF";
         return;
     }
-    // Establecer el estado a "girando".
-    isSpinning = true;
-    resultText.textContent = "Girando...";
-    btnSpin.disabled = true;
-    panel.classList.remove('win-effect', 'lose-effect');
-    balanceEl.classList.remove('win-effect', 'lose-effect');
 
-    fetch('/api/spin', {
-        // Llama a la API del backend para obtener el resultado del giro.
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    spinning = true;
+    updateMessage("Girando…");
+    
+    // Deshabilitar botones durante el giro
+    document.getElementById("btnSpin").disabled = true;
+    document.getElementById("btnAuto").disabled = true;
+
+    fetch("/api/spin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            balance: balance,
+            balance: saldo,
             bet: selectedBet,
             color: selectedColor
         })
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
-        // Si la API devuelve un error (ej. saldo insuficiente), lo muestra.
         if (data.error) {
-            resultText.textContent = data.error;
-            isSpinning = false;
-            btnSpin.disabled = false;
+            spinning = false;
+            updateMessage(data.error);
             return;
         }
-        animateToResult(data);
-        // Si la llamada es exitosa, inicia la animación hacia el resultado.
+
+        winnerIndex = data.index;
+        winnerNumber = data.number;
+        winnerColor = data.color;
+        lastWinAmount = data.win;
+        saldo = data.newBalance;
+        saldoSpan.textContent = "$" + saldo;
+
+        animateSpin();
     })
-    .catch(error => {
-        console.error('Error en la API:', error);
-        resultText.textContent = "Error de conexión. Inténtalo de nuevo.";
-        isSpinning = false;
-        btnSpin.disabled = false;
+    .catch(() => {
+        spinning = false;
+        updateMessage("Error de conexión.");
     });
 }
 
-/**
- * Realiza la animación de la ruleta y la bola hasta el resultado final.
- * @param {object} result - El objeto de resultado devuelto por la API.
- */
-function animateToResult(result) {
-  const { index } = result;
-  isPhysicsRunning = true;
+// -----------------------------------------------------------
+// ANIMACIÓN REALISTA
+// -----------------------------------------------------------
+function animateSpin() {
+    let wheelSpeed = INITIAL_WHEEL_SPEED;
+    let ballSpeed = INITIAL_BALL_SPEED;
 
-  // 1. Configuración de la animación de la ruleta (igual que antes)
-  const targetAngle = -(index * SECTOR_ANGLE) - SECTOR_ANGLE / 2;
-  const fullSpins = 5;
-  let totalRotation = (fullSpins * 2 * Math.PI) + targetAngle;
-  const duration = 8000; // Duración principal de la animación
-  let startTime = null;
-
-  // 2. Configuración del mundo físico con Matter.js
-  World.clear(world); // Limpia el mundo anterior
-  pockets = [];
-  const pocketRadius = 80; // Radio donde se asientan los números
-
-  // Crea los "pockets" (obstáculos) entre los números
-  for (let i = 0; i < NUMBER_OF_SECTORS; i++) {
-    const angle = i * SECTOR_ANGLE;
-    const x = pocketRadius * Math.cos(angle);
-    const y = pocketRadius * Math.sin(angle);
-    // Los 'pockets' son ahora más como cuñas para atrapar mejor la bola.
-    const pocket = Bodies.rectangle(x, y, 5, 15, {
-        isStatic: true,
-        angle: angle,
-        restitution: 0.4, // Menos rebote
-        friction: 0.8, // Más fricción para que la bola se frene al contacto
-    });
-    pockets.push(pocket);
-  }
-  World.add(world, pockets);
-
-  // Crea la bola física
-  // Aumentamos ligeramente la restitución de la bola para un rebote más visible.
-  // Añadimos 'slop' para permitir un pequeño solapamiento y evitar que se atasque.
-  ball = Bodies.circle(0, -180, 8, { restitution: 0.6, friction: 0.02, slop: 0.1 });
-  World.add(world, ball);
-
-  // Impulso inicial a la bola para que gire
-  Body.setVelocity(ball, { x: 12, y: 0 }); // Velocidad tangencial inicial
-
-  // 3. Bucle de animación principal
-  function animationStep(timestamp) {
-    if (!isPhysicsRunning) return; // Usamos la nueva bandera para controlar el bucle
-    if (!startTime) startTime = timestamp;
-    const progress = timestamp - startTime;
-
-    // --- Actualización de la ruleta ---
-    const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
-    const wheelProgress = Math.min(progress / duration, 1);
-    const currentWheelAngle = easeOutQuint(wheelProgress) * totalRotation;
-    const lastWheelAngle = wheelAngle;
-    wheelAngle = currentWheelAngle;
-    const wheelAngularVelocity = wheelAngle - lastWheelAngle;
-
-    // --- Actualización del motor de física ---
-    // Rota los pockets junto con la ruleta
-    pockets.forEach(p => Body.rotate(p, wheelAngularVelocity, { x: 0, y: 0 }));
-
-    // --- Modelo de Física de 2 Fases ---
-    const speed = Matter.Vector.magnitude(ball.velocity);
-    const fallSpeedThreshold = 4.5; // Velocidad a la que la bola "cae" de la pista
-
-    if (speed > fallSpeedThreshold) {
-        // FASE 1: La bola está en la pista exterior. Aplicamos fricción para que pierda velocidad.
-        Body.applyForce(ball, ball.position, {
-            x: -ball.velocity.x * 0.001, // Fuerza de fricción opuesta a la velocidad
-            y: -ball.velocity.y * 0.001,
-        });
-    } else {
-        // FASE 2: La bola ha perdido velocidad y "cae". Aplicamos una fuerza constante hacia el centro.
-        Body.applyForce(ball, ball.position, { x: -ball.position.x * 0.0005, y: -ball.position.y * 0.0005 });
-    }
-
-    // Actualiza el motor de física
-    Engine.update(engine, 1000 / 60);
-
-    // --- Dibujado ---
-    drawWheel();
+    // Reiniciar la posición de la bola para la nueva animación
+    ballAngle = 0;
+    ballRadius = R_BALL_START;
     drawBall();
 
-    // --- Condición de fin ---
-    const distFromCenter = Matter.Vector.magnitude(ball.position);
-
-    // La animación termina cuando la ruleta casi se ha detenido Y la bola ha perdido casi toda su velocidad y está en la zona de números.
-    if (wheelProgress >= 0.95 && speed < 0.1 && distFromCenter < 120) {
-        // La bola se ha asentado de forma natural.
-        isPhysicsRunning = false; // Detiene el bucle de animación
-        finishSpin(result);
-        return; // Termina el bucle de animación
+    // --- LÓGICA DE ANIMACIÓN REALISTA ---
+    // 1. Calcular cuántos fotogramas tardará la bola en detenerse.
+    let ballFrames = 0;
+    let tempSpeed = INITIAL_BALL_SPEED;
+    while (Math.abs(tempSpeed) > 0.001) { // Umbral de detención
+        tempSpeed *= FRICTION_BALL;
+        ballFrames++;
     }
 
-    // Si la animación no ha terminado, solicita el siguiente frame.
-    // Damos un tiempo extra de seguridad para que la bola se asiente.
-    if (progress < duration + 5000) { // Aumentamos el fallback por si la bola rebota mucho
-      requestAnimationFrame(animationStep);
-    } else {
-      // Fallback de seguridad: si después de mucho tiempo no se para, forzamos el final.
-      isPhysicsRunning = false;
-      finishSpin(result);
-    }
-  }
+    // 2. Calcular el ángulo final de la bola después de esos fotogramas.
+    const finalBallAngle = ballAngle + INITIAL_BALL_SPEED * (1 - Math.pow(FRICTION_BALL, ballFrames)) / (1 - FRICTION_BALL);
 
-  requestAnimationFrame(animationStep);
-}
+    // 3. Calcular el ángulo objetivo de la ruleta para que el número ganador coincida.
+    const targetWheelAngle = finalBallAngle - (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) + Math.PI / 2;
 
-/**
- * Finaliza el giro, actualiza el saldo, muestra el resultado y prepara el siguiente giro.
- * @param {object} result - El objeto de resultado de la API.
- */
-function finishSpin(result) {
-    const { number, color, win, newBalance } = result;
+    function frame() {
+        wheelAngle += wheelSpeed;
+        ballAngle += ballSpeed;
 
-    // Comprobamos si el giro ya ha sido finalizado para evitar ejecuciones múltiples.
-    if (!isSpinning) return;
-    isSpinning = false;
-    btnSpin.disabled = false; // Habilitamos el botón inmediatamente
+        wheelSpeed *= FRICTION_WHEEL;
+        ballSpeed *= FRICTION_BALL;
 
-    // Actualiza el saldo y la UI.
-    balance = newBalance;
-    updateUI();
+        // La bola "cae" hacia el centro a medida que pierde velocidad
+        const speedRatio = Math.max(0, Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED));
+        ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * speedRatio;
 
-    // Muestra el mensaje de victoria o derrota y aplica los efectos visuales correspondientes.
-    if (win > 0) {
-        resultText.textContent = `¡Ganaste $${win}! Salió ${number} ${color}.`;
-        panel.classList.add('win-effect');
-        balanceEl.classList.add('win-effect');
-    } else {
-        resultText.textContent = `Perdiste. Salió ${number} ${color}.`;
-        panel.classList.add('lose-effect');
-        balanceEl.classList.add('lose-effect');
-    }
-
-    // Añade el resultado al historial.
-    updateHistory(number, color);
-
-    // Espera un momento antes de permitir un nuevo giro.
-    setTimeout(() => {
-        canvasWrapper.classList.remove('zoomed');
-        // Si el modo auto-spin está activado, inicia un nuevo giro automáticamente.
-        if (isAutoSpin) {
-            spin();
-        } else {
-            resultText.textContent = "Realiza tu próxima apuesta...";
+        // --- SONIDO DE CLIC ---
+        // Reproduce un clic basado en la velocidad de la bola
+        if (speedRatio > 0.1 && Math.abs(ballSpeed) > Math.abs(wheelSpeed)) {
+             // El % 0.1 simula la frecuencia de paso por las casillas
+            if (Math.abs(ballAngle % 0.1) < 0.01) sounds.click.play();
         }
-        World.clear(world); // Limpia los cuerpos para el próximo giro
-    }, 3000);
-}
 
-/**
- * Actualiza el historial de resultados en la interfaz.
- * @param {number} number - El número ganador.
- * @param {string} colorName - El color del número ganador.
- */
-function updateHistory(number, colorName) {
-    // Añade el nuevo resultado al principio del array.
-    history.unshift({ number, colorName });
-    // Limita el historial a los últimos 10 resultados.
-    if (history.length > 10) {
-        history.pop();
-    }
-    historyEl.innerHTML = '';
-    history.forEach(entry => {
-        const entryDiv = document.createElement('div');
-        entryDiv.className = `history-entry color-${entry.colorName}`;
-        entryDiv.textContent = entry.number;
-        historyEl.appendChild(entryDiv);
-    });
-}
+        drawWheel();
+        drawBall();
 
-/* -----------------------------------------------------------
-   MANEJADORES DE EVENTOS
------------------------------------------------------------ */
-
-// Asigna el evento 'click' a los botones de selección de color.
-document.querySelectorAll('.color-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        if (isSpinning) return;
-        selectedColor = btn.dataset.color;
-        updateUI();
-    });
-});
-
-// Asigna el evento 'click' al botón principal de giro.
-btnSpin.addEventListener('click', spin);
-
-// Asigna el evento 'click' al botón de auto-spin.
-btnAuto.addEventListener('click', () => {
-    isAutoSpin = !isAutoSpin;
-    btnAuto.textContent = `AUTO SPIN: ${isAutoSpin ? 'ON' : 'OFF'}`;
-    btnAuto.classList.toggle('active', isAutoSpin); // Puedes añadir estilos para .active
-    if (isAutoSpin && !isSpinning) {
-        spin();
-    }
-});
-
-/* -----------------------------------------------------------
-   INICIALIZACIÓN
------------------------------------------------------------ */
-/**
- * Función principal que se ejecuta al cargar la página.
- * Configura el estado inicial del juego.
- */
-function init() {
-    // 1. Configura el motor de física
-    engine = Engine.create();
-    world = engine.world;
-    engine.world.gravity.y = 0; // Sin gravedad vertical
-
-    // 2. Inicia el bucle de dibujado principal
-    function idleAnimation() {
-        // Solo dibuja la ruleta estática si no está girando.
-        if (!isSpinning && !isPhysicsRunning) {
-            drawWheel();
+        // Cuando la bola se detiene, ajustamos la ruleta a su posición final y rebotamos.
+        if (Math.abs(ballSpeed) < 0.001) {
+            wheelAngle = targetWheelAngle; // Ajuste final y preciso de la ruleta
+            ballAngle = finalBallAngle;   // Ajuste final de la bola
+            bounceBall(finalBallAngle);
+            return;
         }
-        requestAnimationFrame(idleAnimation);
+
+        requestAnimationFrame(frame);
     }
 
-    // 3. Configura el resto de la UI
-    createChips();
-    updateUI();
-    idleAnimation();
-
-    // 4. Selecciona valores por defecto
-    document.querySelector('.color-btn[data-color="rojo"]').classList.add('selected');
-    document.querySelector('.chip-btn[data-value="10"]').classList.add('selected');
+    requestAnimationFrame(frame);
 }
 
-init();
+// -----------------------------------------------------------
+// REBOTE REALISTA FINAL
+// -----------------------------------------------------------
+function bounceBall(finalAngle) {
+    const amp = 0.05;
+    const bounces = 10;
+    const duration = 700;
+    const start = performance.now();
 
+    function bounce(now) {
+        let t = (now - start) / duration;
+        if (t > 1) t = 1;
 
-/* -----------------------------------------------------------
-   EFECTO RGB EN EL BORDE (OPCIONAL)
------------------------------------------------------------ */
-// Este bloque de código crea un efecto de borde brillante y animado alrededor de la ruleta.
+        const decay = 1 - t;
+        const offset = Math.sin(t * bounces * Math.PI) * amp * decay;
 
-const rgbCanvas = document.getElementById('rgbCanvas');
-const ctxRgb = rgbCanvas.getContext('2d');
-let hue = 0;
+        ballAngle = finalAngle + offset;
 
-/**
- * Dibuja un borde con un gradiente cónico que cambia de color.
- */
-function drawRgbGlow() {
-    const radius = rgbCanvas.width / 2;
-    // Crea un gradiente cónico (como un arcoíris circular).
-    const gradient = ctxRgb.createConicGradient(0, radius, radius);
+        drawWheel();
+        drawBall();
 
-    for (let i = 0; i <= 360; i += 30) {
-        const color = `hsl(${(hue + i) % 360}, 100%, 50%)`;
-        gradient.addColorStop(i / 360, color);
+        if (t < 1) requestAnimationFrame(bounce);
+        else showResult();
     }
 
-    // Dibuja el arco con el gradiente.
-    ctxRgb.clearRect(0, 0, rgbCanvas.width, rgbCanvas.height);
-    ctxRgb.save();
-    ctxRgb.translate(radius, radius);
-    ctxRgb.rotate(Date.now() / 1000); // Rotación suave del gradiente.
-
-    ctxRgb.beginPath();
-    ctxRgb.arc(0, 0, radius, 0, 2 * Math.PI);
-    ctxRgb.strokeStyle = gradient;
-    ctxRgb.lineWidth = 6; // Ancho del borde RGB
-    ctxRgb.filter = 'blur(10px)'; // Efecto de desenfoque para el glow
-    ctxRgb.stroke();
-
-    ctxRgb.restore();
-
-    // Incrementa el matiz (hue) para animar el color en el tiempo.
-    hue = (hue + 1) % 360;
-    requestAnimationFrame(drawRgbGlow);
+    requestAnimationFrame(bounce);
 }
 
-// Inicia la animación del borde RGB.
-drawRgbGlow();
+// -----------------------------------------------------------
+// MOSTRAR RESULTADO FINAL
+// -----------------------------------------------------------
+function showResult() {
+    spinning = false;
+
+    // Habilitar botones de nuevo
+    document.getElementById("btnSpin").disabled = false;
+    document.getElementById("btnAuto").disabled = false;
+
+    // Crear un span para el nuevo número del historial con su color
+    const historyEntry = document.createElement('span');
+    historyEntry.textContent = winnerNumber;
+    historyEntry.className = `history-entry color-${winnerColor}`;
+    
+    // Añadirlo al principio del historial
+    historySpan.prepend(historyEntry);
+
+    if (lastWinAmount > 0) {
+        updateMessage(`¡GANASTE! Número ${winnerNumber} (${winnerColor}) +$${lastWinAmount}`);
+        sounds.win.play();
+    } else {
+        updateMessage(`Perdiste. Número ${winnerNumber} (${winnerColor}) -$${selectedBet}`);
+    }
+
+    if (autoSpin && saldo >= selectedBet) {
+        setTimeout(() => spin(true), 1500);
+    } else if (autoSpin) {
+        toggleAuto(); // Apagar si no hay saldo
+        updateMessage("Auto-spin detenido. Saldo insuficiente.");
+    }
+}
+
+// -----------------------------------------------------------
+// AUTO SPIN
+// -----------------------------------------------------------
+function toggleAuto() {
+    autoSpin = !autoSpin;
+    document.getElementById("btnAuto").textContent = `AUTO SPIN: ${autoSpin ? "ON" : "OFF"}`;
+    if (autoSpin && !spinning) spin(true);
+}
+
+// -----------------------------------------------------------
+// DIBUJAR RULETA
+// -----------------------------------------------------------
+function drawWheel() {
+    ctx.clearRect(0,0,460,460);
+
+    const slices = WHEEL_ORDER.length;
+    const anglePerSlice = (Math.PI * 2) / slices;
+
+    for (let i = 0; i < slices; i++) {
+
+        const start = wheelAngle + i * anglePerSlice - Math.PI / 2;
+        const end   = start + anglePerSlice;
+
+        const num = WHEEL_ORDER[i];
+        const col =
+            num === 0 ? "#0bb400" :
+            // Corrección: Usar la misma lista de rojos que el backend
+            [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36].includes(num)
+            ? "#d00000" : "#000";
+
+        // sector
+        ctx.beginPath();
+        ctx.moveTo(CENTER, CENTER);
+        ctx.arc(CENTER, CENTER, R_WHEEL, start, end);
+        ctx.closePath();
+        ctx.fillStyle = col;
+        ctx.fill();
+
+        // número
+        ctx.save();
+        ctx.translate(CENTER, CENTER);
+        ctx.rotate(start + anglePerSlice / 2);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(num, R_WHEEL - 36, 8);
+        ctx.restore();
+    }
+}
+
+// -----------------------------------------------------------
+// DIBUJAR BOLA
+// -----------------------------------------------------------
+function drawBall() {
+    ballCtx.clearRect(0,0,460,460);
+
+    const x = CENTER + Math.cos(ballAngle) * ballRadius;
+    const y = CENTER + Math.sin(ballAngle) * ballRadius;
+
+    ballCtx.beginPath();
+    ballCtx.arc(x, y, 12, 0, Math.PI * 2);
+    ballCtx.fillStyle = "#fff";
+    ballCtx.fill();
+}
+
+// -----------------------------------------------------------
+// INICIAR DIBUJOS
+// -----------------------------------------------------------
+drawWheel();
+drawBall();
+updateMessage();
