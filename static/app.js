@@ -212,11 +212,6 @@ function animateSpin() {
     }
 
     // 2. Calcular el ángulo final de la bola después de esos fotogramas.
-    const finalBallAngle = ballAngle + INITIAL_BALL_SPEED * (1 - Math.pow(FRICTION_BALL, ballFrames)) / (1 - FRICTION_BALL);
-
-    // 3. Calcular el ángulo objetivo de la ruleta para que el número ganador coincida.
-    const targetWheelAngle = finalBallAngle - (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) + Math.PI / 2;
-
     function frame() {
         wheelAngle += wheelSpeed;
         ballAngle += ballSpeed;
@@ -238,50 +233,28 @@ function animateSpin() {
         drawWheel();
         drawBall();
 
+        // --- GUIADO SUAVE HACIA EL RESULTADO ---
+        // A medida que la bola pierde velocidad, aplicamos una fuerza de corrección
+        // para que la ruleta se alinee con el número ganador.
+        const targetAngle = ballAngle - (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) + Math.PI / 2;
+        const angleDifference = targetAngle - wheelAngle;
+        
+        // La fuerza de corrección es mayor cuanto más lenta es la bola.
+        const correctionForce = (1 - speedRatio) * 0.005; 
+        wheelAngle += angleDifference * correctionForce;
+
         // Cuando la bola se detiene, ajustamos la ruleta a su posición final y rebotamos.
         if (Math.abs(ballSpeed) < 0.001) {
-            // En lugar de saltar, iniciamos una animación suave hacia el objetivo.
-            return guideToTarget(wheelAngle, ballAngle, targetWheelAngle, finalBallAngle);
+            // Aseguramos la posición final y comenzamos el rebote.
+            wheelAngle = targetAngle;
+            bounceBall(ballAngle);
+            return; // Detenemos este bucle de animación.
         }
 
         requestAnimationFrame(frame);
     }
 
     requestAnimationFrame(frame);
-}
-
-// -----------------------------------------------------------
-// GUIADO SUAVE HACIA EL RESULTADO FINAL
-// -----------------------------------------------------------
-function guideToTarget(currentWheelAngle, currentBallAngle, targetWheelAngle, targetBallAngle) {
-    const duration = 800; // Duración de la animación de guiado en ms
-    const start = performance.now();
-
-    function guideFrame(now) {
-        let t = (now - start) / duration;
-        if (t > 1) t = 1;
-
-        // Usamos una función de easing para que el movimiento sea más suave (ease-out)
-        const easedT = 1 - Math.pow(1 - t, 3);
-
-        // Interpolamos los ángulos desde la posición actual a la final
-        wheelAngle = currentWheelAngle + (targetWheelAngle - currentWheelAngle) * easedT;
-        ballAngle = currentBallAngle + (targetBallAngle - currentBallAngle) * easedT;
-
-        drawWheel();
-        drawBall();
-
-        if (t < 1) {
-            requestAnimationFrame(guideFrame);
-        } else {
-            // Una vez que la ruleta está en su sitio, iniciamos el rebote final de la bola
-            wheelAngle = targetWheelAngle; // Aseguramos la posición final exacta
-            ballAngle = targetBallAngle;
-            bounceBall(targetBallAngle);
-        }
-    }
-
-    requestAnimationFrame(guideFrame);
 }
 
 
