@@ -85,6 +85,7 @@ document.getElementById("btnAuto").onclick = toggleAuto;
 
 generateChips();
 initPhysics(); // Inicializamos el mundo físico
+drawWheel(); // Dibujamos la ruleta en su estado inicial al cargar la página
 
 // -----------------------------------------------------------
 // GENERAR FICHAS
@@ -176,6 +177,9 @@ function spin(fromAuto) {
     // Deshabilitar botones durante el giro
     document.getElementById("btnSpin").disabled = true;
     document.getElementById("btnAuto").disabled = true;
+    document.querySelectorAll(".color-btn, .chip-btn").forEach(btn => {
+        btn.disabled = true;
+    });
 
     fetch("/api/spin", {
         method: "POST",
@@ -225,24 +229,25 @@ function initPhysics() {
         render: { visible: false } // No queremos que se vea
     });
 
-    // --- NUEVA LÓGICA: CUERPO COMPUESTO ---
-    // 1. Creamos los separadores (pegs) como cuerpos individuales.
+    // --- CUERPO COMPUESTO DE LA RULETA ---
     const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
-    pegs = WHEEL_ORDER.map((_, i) => {
-        const angle = i * anglePerSlice;
-        const x = CENTER + Math.cos(angle) * (R_NUMBERS + 10);
-        const y = CENTER + Math.sin(angle) * (R_NUMBERS + 10);
-        // Les damos una etiqueta para detectar colisiones.
-        return Bodies.circle(x, y, 4, { label: 'peg', restitution: 0.5 });
-    });
 
-    // 2. Creamos el cuerpo principal de la ruleta y lo combinamos con los pegs.
-    const wheelDisc = Bodies.circle(CENTER, CENTER, R_WHEEL, { label: 'wheel' });
+    // Creamos el cuerpo principal de la ruleta (disco y separadores) en un solo paso.
     wheelBody = Body.create({
-        parts: [wheelDisc, ...pegs], // Combinamos el disco y los pegs en un solo cuerpo.
-        isStatic: false, // ¡Ahora es un cuerpo dinámico!
-        frictionAir: 0.01, // Aumentamos la fricción para que no gire eternamente.
-        inverseInertia: 0.00005, // Reducimos la inercia para que la bola influya un poco más.
+        isStatic: false,
+        frictionAir: 0.01,
+        inverseInertia: 0.00005,
+        parts: [
+            // 1. El disco principal
+            Bodies.circle(CENTER, CENTER, R_WHEEL, { label: 'wheel' }),
+            // 2. Los separadores (pegs), creados directamente aquí
+            ...WHEEL_ORDER.map((_, i) => {
+                const angle = i * anglePerSlice;
+                const x = CENTER + Math.cos(angle) * (R_NUMBERS + 10);
+                const y = CENTER + Math.sin(angle) * (R_NUMBERS + 10);
+                return Bodies.circle(x, y, 4, { label: 'peg', restitution: 0.5 });
+            })
+        ],
         label: 'wheel'
     });
 
@@ -277,11 +282,10 @@ function initPhysics() {
         if (isGuiding && Math.abs(wheelBody.angularSpeed) < 0.001 && ballBody.speed < 0.05) {
             spinning = false;
             isGuiding = false;
-            // Detenemos la ruleta y la bola completamente.
-            Body.setAngularVelocity(wheelBody, 0); // Detener completamente.
+            // Detenemos la ruleta y la bola en su posición final.
+            Body.setAngularVelocity(wheelBody, 0);
             Body.setVelocity(ballBody, {x: 0, y: 0});
-            // La movemos a su posición final exacta sobre el número.
-            guideBallToFinalPosition();
+            
             World.remove(world, ballBody);
             ballBody = null;
             showResult();
@@ -306,6 +310,7 @@ function initPhysics() {
     // Iniciamos el corredor del motor.
     runner = Runner.create();
     Runner.run(runner, engine);
+    console.log("Motor de físicas iniciado y corriendo.");
 }
 
 function startPhysicsSpin() {
@@ -363,6 +368,9 @@ function showResult() {
     // Habilitar botones de nuevo
     document.getElementById("btnSpin").disabled = false;
     document.getElementById("btnAuto").disabled = false;
+    document.querySelectorAll(".color-btn, .chip-btn").forEach(btn => {
+        btn.disabled = false;
+    });
 
     const panel = document.querySelector('.panel');
 
@@ -466,4 +474,4 @@ function drawBall() {
 // -----------------------------------------------------------
 // INICIAR DIBUJOS
 // -----------------------------------------------------------
-updateMessage();
+updateMessage(); // Actualiza el mensaje inicial
