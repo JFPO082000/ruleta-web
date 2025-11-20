@@ -301,13 +301,22 @@ function animateToResult(result) {
     // --- Actualización del motor de física ---
     // Rota los pockets junto con la ruleta
     pockets.forEach(p => Body.rotate(p, wheelAngularVelocity, { x: 0, y: 0 }));
-    // Aplica una fuerza centrípeta que aumenta con el tiempo para que la bola caiga.
-    const pullForce = 0.0005 * (progress / duration); // La fuerza aumenta con el tiempo
-    const pull = {
-        x: -ball.position.x * pullForce,
-        y: -ball.position.y * pullForce
-    };
-    Body.applyForce(ball, ball.position, pull);
+
+    // --- Modelo de Física de 2 Fases ---
+    const speed = Matter.Vector.magnitude(ball.velocity);
+    const fallSpeedThreshold = 4.5; // Velocidad a la que la bola "cae" de la pista
+
+    if (speed > fallSpeedThreshold) {
+        // FASE 1: La bola está en la pista exterior. Aplicamos fricción para que pierda velocidad.
+        Body.applyForce(ball, ball.position, {
+            x: -ball.velocity.x * 0.001, // Fuerza de fricción opuesta a la velocidad
+            y: -ball.velocity.y * 0.001,
+        });
+    } else {
+        // FASE 2: La bola ha perdido velocidad y "cae". Aplicamos una fuerza constante hacia el centro.
+        Body.applyForce(ball, ball.position, { x: -ball.position.x * 0.0005, y: -ball.position.y * 0.0005 });
+    }
+
     // Actualiza el motor de física
     Engine.update(engine, 1000 / 60);
 
@@ -316,12 +325,10 @@ function animateToResult(result) {
     drawBall();
 
     // --- Condición de fin ---
-    // Comprueba si la bola ha perdido casi toda su velocidad y está cerca del centro.
-    const speed = Matter.Vector.magnitude(ball.velocity);
     const distFromCenter = Matter.Vector.magnitude(ball.position);
 
-    // La animación termina cuando la ruleta casi se ha detenido Y la bola ha perdido casi toda su velocidad.
-    if (wheelProgress >= 1 && speed < 0.05 && distFromCenter < 100) {
+    // La animación termina cuando la ruleta casi se ha detenido Y la bola ha perdido casi toda su velocidad y está en la zona de números.
+    if (wheelProgress >= 0.95 && speed < 0.1 && distFromCenter < 120) {
         // La bola se ha asentado de forma natural.
         isPhysicsRunning = false; // Detiene el bucle de animación
         finishSpin(result);
@@ -330,7 +337,7 @@ function animateToResult(result) {
 
     // Si la animación no ha terminado, solicita el siguiente frame.
     // Damos un tiempo extra de seguridad para que la bola se asiente.
-    if (progress < duration + 4000) {
+    if (progress < duration + 5000) { // Aumentamos el fallback por si la bola rebota mucho
       requestAnimationFrame(animationStep);
     } else {
       // Fallback de seguridad: si después de mucho tiempo no se para, forzamos el final.
