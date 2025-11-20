@@ -1,5 +1,5 @@
 // -----------------------------------------------------------
-// 🔵 RULETA EUROPEA – CON MOTOR DE FÍSICA MATTER.JS
+// 🔵 RULETA EUROPEA – CLIENTE SINCRONIZADO CON BACKEND
 // -----------------------------------------------------------
 
 // Números de la ruleta en orden. Ahora se inicializan aquí
@@ -10,6 +10,21 @@ let WHEEL_ORDER = [
     16, 33, 1, 20, 14, 31, 9, 22, 18, 29,
     7, 28, 12, 35, 3, 26
 ];
+
+// Coordenadas
+const CENTER = 230;
+const R_WHEEL = 210;
+
+// Radios de la bola para el efecto de "caída"
+const R_BALL_START = 195; // Radio inicial, en el borde exterior
+const R_BALL_END = 150;   // Radio final, ajustado para no superponerse a los números
+
+// Velocidades naturales
+const INITIAL_WHEEL_SPEED = 0.22; // Positivo: Ruleta gira en sentido horario
+const INITIAL_BALL_SPEED = -0.82;  // Negativo: Bola gira en sentido antihorario
+
+const FRICTION_WHEEL = 0.9925;
+const FRICTION_BALL = 0.985;
 
 // -----------------------------------------------------------
 // CANVAS
@@ -27,29 +42,6 @@ rouletteCanvas.width = rouletteCanvas.height = 460;
 rgbCanvas.width = rgbCanvas.height = 460;
 ballCanvas.width = ballCanvas.height = 460;
 
-// Coordenadas y dimensiones
-const CENTER = 230;
-const R_WHEEL = 210;
-const R_BALL_TRACK = 195; // Radio de la pista donde gira la bola
-const R_NUMBERS = 150;    // Radio donde están los números
-
-// -----------------------------------------------------------
-// MOTOR DE FÍSICA MATTER.JS
-// -----------------------------------------------------------
-const { Engine, Runner, World, Bodies, Body, Events, Composite } = Matter;
-
-let engine;
-let world;
-let runner;
-
-let ballBody;
-let wheelBody;
-let pegs = []; // Los separadores entre números
-
-// Variable para controlar la fase de "guía" final
-let isGuiding = false;
-
-
 // Estado
 const sounds = {
     click: new Audio('/static/sounds/click.wav'),
@@ -57,6 +49,9 @@ const sounds = {
     lose: new Audio('/static/sounds/lose.wav')
 };
 
+let wheelAngle = 0;
+let ballAngle = 0;
+let ballRadius = R_BALL_START; // El radio de la bola ahora es variable
 let spinning = false;
 
 let saldo = 1000;
@@ -84,8 +79,6 @@ document.getElementById("btnSpin").onclick = () => spin(false);
 document.getElementById("btnAuto").onclick = toggleAuto;
 
 generateChips();
-initPhysics(); // Inicializamos el mundo físico
-drawWheel(); // Dibujamos la ruleta en su estado inicial al cargar la página
 
 // -----------------------------------------------------------
 // GENERAR FICHAS
@@ -108,25 +101,12 @@ function generateChips() {
 // -----------------------------------------------------------
 // SELECCIÓN COLOR Y APUESTA
 // -----------------------------------------------------------
-
-// Función auxiliar para obtener el color de un número. Fuente única de verdad.
-function getColorForNumber(num) {
-    if (num === 0) return "verde";
-    const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
-    return redNumbers.includes(num) ? "rojo" : "negro";
-}
-
 function selectColor(c) {
-    // 1. Quitar la clase 'selected' de todos los botones de color
     document.querySelectorAll(".color-btn")
         .forEach(b => b.classList.remove("selected"));
 
-    // 2. CORRECCIÓN: Seleccionar el botón por su ID y añadir la clase 'selected'
-    // Tu HTML usa id="btnRojo", etc. No "data-color".
-    const buttonId = `btn${c.charAt(0).toUpperCase() + c.slice(1)}`;
-    document.getElementById(buttonId).classList.add("selected");
+    document.querySelector(`[data-color="${c}"]`).classList.add("selected");
 
-    // 3. Guardar el color seleccionado
     selectedColor = c;
     updateMessage();
 }
@@ -177,9 +157,6 @@ function spin(fromAuto) {
     // Deshabilitar botones durante el giro
     document.getElementById("btnSpin").disabled = true;
     document.getElementById("btnAuto").disabled = true;
-    document.querySelectorAll(".color-btn, .chip-btn").forEach(btn => {
-        btn.disabled = true;
-    });
 
     fetch("/api/spin", {
         method: "POST",
@@ -205,11 +182,10 @@ function spin(fromAuto) {
         saldo = data.newBalance;
         saldoSpan.textContent = "$" + saldo;
 
-        startPhysicsSpin();
+        animateSpin();
     })
-    .catch((err) => {
+    .catch(() => {
         spinning = false;
-        console.error("Error en la API:", err);
         updateMessage("Error de conexión.");
     });
 }
@@ -217,146 +193,91 @@ function spin(fromAuto) {
 // -----------------------------------------------------------
 // ANIMACIÓN REALISTA
 // -----------------------------------------------------------
-function initPhysics() {
-    engine = Engine.create();
-    world = engine.world;
-    world.gravity.y = 0; // No queremos gravedad hacia abajo.
+function animateSpin() {
+    let wheelSpeed = INITIAL_WHEEL_SPEED;
+    let ballSpeed = INITIAL_BALL_SPEED;
 
-    // --- MURO CONTENEDOR ---
-    // Añadimos un cuerpo estático circular (un "muro") para que la bola no se salga.
-    const wall = Bodies.circle(CENTER, CENTER, R_WHEEL + 10, {
-        isStatic: true,
-        render: { visible: false } // No queremos que se vea
-    });
+    // Reiniciar la posición de la bola para la nueva animación
+    ballAngle = 0;
+    ballRadius = R_BALL_START;
+    drawBall();
 
-    // --- CUERPO COMPUESTO DE LA RULETA ---
-    const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
+    // --- LÓGICA DE ANIMACIÓN REALISTA ---
+    // 1. Calcular cuántos fotogramas tardará la bola en detenerse.
+    let ballFrames = 0;
+    let tempSpeed = INITIAL_BALL_SPEED;
+    while (Math.abs(tempSpeed) > 0.001) { // Umbral de detención
+        tempSpeed *= FRICTION_BALL;
+        ballFrames++;
+    }
 
-    // Creamos el cuerpo principal de la ruleta (disco y separadores) en un solo paso.
-    wheelBody = Body.create({
-        isStatic: false,
-        frictionAir: 0.01,
-        inverseInertia: 0.00005,
-        parts: [
-            // 1. El disco principal
-            Bodies.circle(CENTER, CENTER, R_WHEEL, { label: 'wheel' }),
-            // 2. Los separadores (pegs), creados directamente aquí
-            ...WHEEL_ORDER.map((_, i) => {
-                const angle = i * anglePerSlice;
-                const x = CENTER + Math.cos(angle) * (R_NUMBERS + 10);
-                const y = CENTER + Math.sin(angle) * (R_NUMBERS + 10);
-                return Bodies.circle(x, y, 4, { label: 'peg', restitution: 0.5 });
-            })
-        ],
-        label: 'wheel'
-    });
+    // 2. Calcular el ángulo final de la bola después de esos fotogramas.
+    const finalBallAngle = ballAngle + INITIAL_BALL_SPEED * (1 - Math.pow(FRICTION_BALL, ballFrames)) / (1 - FRICTION_BALL);
 
-    // Añadimos el muro y el cuerpo compuesto de la ruleta al mundo.
-    World.add(world, [wall, wheelBody]);
+    // 3. Calcular el ángulo objetivo de la ruleta para que el número ganador coincida.
+    const targetWheelAngle = finalBallAngle - (winnerIndex * (2 * Math.PI / WHEEL_ORDER.length)) + Math.PI / 2;
 
-    // Bucle de actualización del motor.
-    Events.on(engine, 'afterUpdate', () => {
-        // Dibujamos la ruleta y la bola en cada frame según la data del motor.
+    function frame() {
+        wheelAngle += wheelSpeed;
+        ballAngle += ballSpeed;
+
+        wheelSpeed *= FRICTION_WHEEL;
+        ballSpeed *= FRICTION_BALL;
+
+        // La bola "cae" hacia el centro a medida que pierde velocidad
+        const speedRatio = Math.max(0, Math.abs(ballSpeed) / Math.abs(INITIAL_BALL_SPEED));
+        ballRadius = R_BALL_END + (R_BALL_START - R_BALL_END) * speedRatio;
+
+        // --- SONIDO DE CLIC ---
+        // Reproduce un clic basado en la velocidad de la bola
+        if (speedRatio > 0.1 && Math.abs(ballSpeed) > Math.abs(wheelSpeed)) {
+             // El % 0.1 simula la frecuencia de paso por las casillas
+            if (Math.abs(ballAngle % 0.1) < 0.01) sounds.click.play();
+        }
+
         drawWheel();
-        if (ballBody) drawBall();
+        drawBall();
 
-        if (!spinning) return;
-
-        // Fuerza que atrae la bola al centro (simula la caída).
-        const pullForce = 0.0008; // Aumentamos la fuerza para que la bola caiga de forma más natural.
-        const vector = { x: CENTER - ballBody.position.x, y: CENTER - ballBody.position.y };
-        const normalized = Matter.Vector.normalise(vector);
-        const force = { x: normalized.x * pullForce, y: normalized.y * pullForce };
-        Body.applyForce(ballBody, ballBody.position, force);
-
-        // Lógica para finalizar el giro de forma controlada.
-        if (ballBody.speed < 0.2 && Matter.Vector.magnitude(vector) < R_BALL_TRACK - 20) {
-            isGuiding = true;
+        // Cuando la bola se detiene, ajustamos la ruleta a su posición final y rebotamos.
+        if (Math.abs(ballSpeed) < 0.001) {
+            wheelAngle = targetWheelAngle; // Ajuste final y preciso de la ruleta
+            ballAngle = finalBallAngle;   // Ajuste final de la bola
+            bounceBall(finalBallAngle);
+            return;
         }
 
-        if (isGuiding) {
-            guideWheelToWinner();
-        }
+        requestAnimationFrame(frame);
+    }
 
-        // Condición de fin de la animación.
-        if (isGuiding && Math.abs(wheelBody.angularSpeed) < 0.001 && ballBody.speed < 0.05) {
-            spinning = false;
-            isGuiding = false;
-            // Detenemos la ruleta y la bola en su posición final.
-            Body.setAngularVelocity(wheelBody, 0);
-            Body.setVelocity(ballBody, {x: 0, y: 0});
-            
-            World.remove(world, ballBody);
-            ballBody = null;
-            showResult();
-        }
-    });
-
-    // Sonido de colisión
-    Events.on(engine, 'collisionStart', (event) => {
-        if (!spinning) return;
-        const pairs = event.pairs;
-        for (let i = 0; i < pairs.length; i++) {
-            const pair = pairs[i];
-            if ((pair.bodyA.label === 'ball' && pair.bodyB.label === 'peg') ||
-                (pair.bodyA.label === 'peg' && pair.bodyB.label === 'ball')) {
-                sounds.click.volume = Math.min(1, ballBody.speed / 5);
-                if (sounds.click.volume > 0.1) sounds.click.play();
-                break;
-            }
-        }
-    });
-
-    // Iniciamos el corredor del motor.
-    runner = Runner.create();
-    Runner.run(runner, engine);
-    console.log("Motor de físicas iniciado y corriendo.");
+    requestAnimationFrame(frame);
 }
 
-function startPhysicsSpin() {
-    // Creamos la bola en su posición inicial.
-    ballBody = Bodies.circle(CENTER, CENTER - R_BALL_TRACK, 12, {
-        restitution: 0.3,
-        friction: 0.1,
-        frictionAir: 0.008, // Aumentamos la fricción del aire para la bola.
-        label: 'ball'
-    });
-    World.add(world, ballBody);
-    
-    // Aplicamos fuerzas iniciales.
-    // Aumentamos la velocidad angular de la ruleta para un giro más rápido.
-    Body.setAngularVelocity(wheelBody, 0.3);
-    
-    // Aumentamos la velocidad inicial de la bola.
-    Body.setVelocity(ballBody, { x: -12, y: 0 });
-}
+// -----------------------------------------------------------
+// REBOTE REALISTA FINAL
+// -----------------------------------------------------------
+function bounceBall(finalAngle) {
+    const amp = 0.05;
+    const bounces = 10;
+    const duration = 700;
+    const start = performance.now();
 
-function guideWheelToWinner() {
-    // Esta función "guía" sutilmente la ruleta a su posición final.
-    const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
-    const targetAngle = -(winnerIndex * anglePerSlice) - (anglePerSlice / 2);
+    function bounce(now) {
+        let t = (now - start) / duration;
+        if (t > 1) t = 1;
 
-    // Calculamos la diferencia de ángulo por el camino más corto (considerando el ángulo actual del cuerpo).
-    let angleDifference = targetAngle - (wheelBody.angle % (2 * Math.PI));
-    if (angleDifference > Math.PI) angleDifference -= 2 * Math.PI;
-    if (angleDifference < -Math.PI) angleDifference += 2 * Math.PI;
+        const decay = 1 - t;
+        const offset = Math.sin(t * bounces * Math.PI) * amp * decay;
 
-    // Aplicamos una fuerza de torsión correctiva muy pequeña.
-    const correctionForce = angleDifference * 0.0008;
-    wheelBody.torque = correctionForce;
-}
+        ballAngle = finalAngle + offset;
 
-function guideBallToFinalPosition() {
-    // Esta función mueve la bola a su posición final sobre el número ganador.
-    const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
-    const targetAngle = -(winnerIndex * anglePerSlice) - (anglePerSlice / 2);
+        drawWheel();
+        drawBall();
 
-    // Calculamos la posición XY del centro del número ganador.
-    const finalX = CENTER + Math.cos(targetAngle) * R_NUMBERS;
-    const finalY = CENTER + Math.sin(targetAngle) * R_NUMBERS;
+        if (t < 1) requestAnimationFrame(bounce);
+        else showResult();
+    }
 
-    // Movemos la bola a esa posición.
-    Body.setPosition(ballBody, { x: finalX, y: finalY });
+    requestAnimationFrame(bounce);
 }
 
 // -----------------------------------------------------------
@@ -368,17 +289,6 @@ function showResult() {
     // Habilitar botones de nuevo
     document.getElementById("btnSpin").disabled = false;
     document.getElementById("btnAuto").disabled = false;
-    document.querySelectorAll(".color-btn, .chip-btn").forEach(btn => {
-        btn.disabled = false;
-    });
-
-    const panel = document.querySelector('.panel');
-
-    // Limpiar efectos anteriores
-    panel.classList.remove('win-effect', 'lose-effect');
-    saldoSpan.classList.remove('win-effect', 'lose-effect');
-    // Forzar reflow para que la animación se pueda repetir
-    void panel.offsetWidth; 
 
     // Crear un span para el nuevo número del historial con su color
     const historyEntry = document.createElement('span');
@@ -391,13 +301,8 @@ function showResult() {
     if (lastWinAmount > 0) {
         updateMessage(`¡GANASTE! Número ${winnerNumber} (${winnerColor}) +$${lastWinAmount}`);
         sounds.win.play();
-        panel.classList.add('win-effect');
-        saldoSpan.classList.add('win-effect');
     } else {
         updateMessage(`Perdiste. Número ${winnerNumber} (${winnerColor}) -$${selectedBet}`);
-        sounds.lose.play();
-        panel.classList.add('lose-effect');
-        saldoSpan.classList.add('lose-effect');
     }
 
     if (autoSpin && saldo >= selectedBet) {
@@ -426,15 +331,18 @@ function drawWheel() {
     const slices = WHEEL_ORDER.length;
     const anglePerSlice = (Math.PI * 2) / slices;
 
-    const currentWheelAngle = wheelBody ? wheelBody.angle : 0;
-
     for (let i = 0; i < slices; i++) {
-        const start = currentWheelAngle + i * anglePerSlice - Math.PI / 2;
+
+        const start = wheelAngle + i * anglePerSlice - Math.PI / 2;
         const end   = start + anglePerSlice;
+
         const num = WHEEL_ORDER[i];
-        // CORRECCIÓN: Usar la función centralizada para obtener el color correcto y consistente.
-        const colorName = getColorForNumber(num);
-        const col = colorName === 'rojo' ? '#d00000' : colorName === 'negro' ? '#000' : '#0bb400';
+        const col =
+            num === 0 ? "#0bb400" :
+            // Corrección: Usar la misma lista de rojos que el backend
+            [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36].includes(num)
+            ? "#d00000" : "#000";
+
         // sector
         ctx.beginPath();
         ctx.moveTo(CENTER, CENTER);
@@ -460,11 +368,10 @@ function drawWheel() {
 // -----------------------------------------------------------
 function drawBall() {
     ballCtx.clearRect(0,0,460,460);
-    if (!ballBody) return;
 
-    const { x, y } = ballBody.position;
+    const x = CENTER + Math.cos(ballAngle) * ballRadius;
+    const y = CENTER + Math.sin(ballAngle) * ballRadius;
 
-    // Dibujamos la bola en la posición que nos da el motor de física.
     ballCtx.beginPath();
     ballCtx.arc(x, y, 12, 0, Math.PI * 2);
     ballCtx.fillStyle = "#fff";
@@ -474,4 +381,6 @@ function drawBall() {
 // -----------------------------------------------------------
 // INICIAR DIBUJOS
 // -----------------------------------------------------------
-updateMessage(); // Actualiza el mensaje inicial
+drawWheel();
+drawBall();
+updateMessage();
