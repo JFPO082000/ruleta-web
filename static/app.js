@@ -17,6 +17,15 @@ const SECTOR_ANGLE = (2 * Math.PI) / NUMBER_OF_SECTORS;
 // Valores de las fichas de apuesta disponibles.
 const CHIP_VALUES = [1, 5, 10, 25, 100, 500];
 
+// --- Constantes de Física (Matter.js) ---
+const Engine = Matter.Engine,
+      Render = Matter.Render, // Render no se usará para dibujar, solo para el motor
+      World = Matter.World,
+      Bodies = Matter.Bodies,
+      Body = Matter.Body,
+      Events = Matter.Events;
+
+
 // Elementos del DOM (canvas) para la ruleta y la bola.
 const rouletteCanvas = document.getElementById('rouletteCanvas');
 const ballCanvas = document.getElementById('ballCanvas');
@@ -57,6 +66,13 @@ let ballAngle = Math.random() * 2 * Math.PI;
 let ballRadius = 180;
 // Velocidad angular de la bola.
 let ballVelocity = 0;
+
+// --- Variables de Física ---
+let engine;
+let world;
+let ball;
+let pockets = [];
+let isPhysicsRunning = false;
 
 /* -----------------------------------------------------------
    INICIALIZACIÓN Y DIBUJO
@@ -125,19 +141,16 @@ function drawBall() {
     // Mueve el origen al centro.
     ctxBall.translate(radius, radius);
 
-    // Calcula las coordenadas (x, y) de la bola basándose en su ángulo y radio orbital.
-    const ballX = ballRadius * Math.cos(ballAngle);
-    const ballY = ballRadius * Math.sin(ballAngle);
-
-    // Dibuja el círculo que representa la bola.
-    ctxBall.beginPath();
-    ctxBall.arc(ballX, ballY, 8, 0, 2 * Math.PI);
-    ctxBall.fillStyle = '#ffffff';
-    ctxBall.fill();
-    ctxBall.strokeStyle = '#cccccc';
-    ctxBall.lineWidth = 2;
-    ctxBall.stroke();
-
+    // Si la simulación física está activa, dibuja la bola según la posición del motor de física.
+    if (isPhysicsRunning && ball) {
+        ctxBall.beginPath();
+        ctxBall.arc(ball.position.x, ball.position.y, 8, 0, 2 * Math.PI);
+        ctxBall.fillStyle = '#ffffff';
+        ctxBall.fill();
+        ctxBall.strokeStyle = '#cccccc';
+        ctxBall.lineWidth = 2;
+        ctxBall.stroke();
+    }
     // Restaura el estado del contexto.
     ctxBall.restore();
 }
@@ -231,75 +244,102 @@ function spin() {
  * @param {object} result - El objeto de resultado devuelto por la API.
  */
 function animateToResult(result) {
-    const { index, number, color, win, newBalance } = result;
+  const { index } = result;
+  isPhysicsRunning = true;
 
-    // Calcula el ángulo objetivo. Es el ángulo del centro del sector ganador.
-    // Se resta SECTOR_ANGLE / 2 para apuntar al centro del sector.
-    // El signo negativo es para que la rotación sea en sentido horario.
-    const targetAngle = -(index * SECTOR_ANGLE) - SECTOR_ANGLE / 2;
-    // Número de vueltas completas que dará la ruleta antes de detenerse.
-    const fullSpins = 5;
-    // La rotación total que debe realizar la ruleta.
-    const totalRotation = (fullSpins * 2 * Math.PI) + targetAngle;
+  // 1. Configuración de la animación de la ruleta (igual que antes)
+  const targetAngle = -(index * SECTOR_ANGLE) - SECTOR_ANGLE / 2;
+  const fullSpins = 5;
+  let totalRotation = (fullSpins * 2 * Math.PI) + targetAngle;
+  const duration = 8000; // Duración principal de la animación
+  let startTime = null;
 
-    // --- Parámetros de la animación ---
-    const duration = 6000; // Duración total de la animación en milisegundos (6 segundos).
-    const zoomInTime = duration * 0.5; // Momento en que comienza el zoom.
-    const slowDownTime = duration * 0.8; // Momento en que la bola empieza a frenar y caer.
-    let startTime = null;
+  // 2. Configuración del mundo físico con Matter.js
+  World.clear(world); // Limpia el mundo anterior
+  pockets = [];
+  const pocketRadius = 80; // Radio donde se asientan los números
 
-    // --- Reseteo de la animación de la bola ---
-    ballVelocity = 0.2;
-    ballRadius = 180; // Radio exterior
+  // Crea los "pockets" (obstáculos) entre los números
+  for (let i = 0; i < NUMBER_OF_SECTORS; i++) {
+    const angle = i * SECTOR_ANGLE;
+    const x = pocketRadius * Math.cos(angle);
+    const y = pocketRadius * Math.sin(angle);
+    // Los 'pockets' son ahora más como cuñas para atrapar mejor la bola.
+    const pocket = Bodies.rectangle(x, y, 5, 15, {
+        isStatic: true,
+        angle: angle,
+        restitution: 0.4, // Menos rebote
+        friction: 0.8, // Más fricción para que la bola se frene al contacto
+    });
+    pockets.push(pocket);
+  }
+  World.add(world, pockets);
 
-    function animationStep(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const progress = timestamp - startTime;
+  // Crea la bola física
+  // Aumentamos ligeramente la restitución de la bola para un rebote más visible.
+  // Añadimos 'slop' para permitir un pequeño solapamiento y evitar que se atasque.
+  ball = Bodies.circle(0, -180, 8, { restitution: 0.6, friction: 0.02, slop: 0.1 });
+  World.add(world, ball);
 
-        // --- Animación de la ruleta ---
-        const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
-        // Calcula el progreso de la animación de la ruleta (de 0 a 1).
-        const wheelProgress = Math.min(progress / duration, 1);
-        // Aplica una función de suavizado (ease-out) para que la ruleta desacelere al final.
-        wheelAngle = easeOutQuint(wheelProgress) * totalRotation;
+  // Impulso inicial a la bola para que gire
+  Body.setVelocity(ball, { x: 12, y: 0 }); // Velocidad tangencial inicial
 
-        // --- Animación de la bola ---
-        ballAngle += ballVelocity;
+  // 3. Bucle de animación principal
+  function animationStep(timestamp) {
+    if (!isPhysicsRunning) return; // Usamos la nueva bandera para controlar el bucle
+    if (!startTime) startTime = timestamp;
+    const progress = timestamp - startTime;
 
-        // Si ha pasado el tiempo de "slowDownTime", la bola empieza a frenar y caer.
-        if (progress > slowDownTime) {
-            const slowDownProgress = (progress - slowDownTime) / (duration - slowDownTime);
-            // La velocidad de la bola disminuye usando la misma función de suavizado.
-            ballVelocity = Math.max(0, 0.2 * (1 - easeOutQuint(slowDownProgress)));
-            // El radio de la bola disminuye, haciendo que "caiga" hacia los números.
-            ballRadius = 180 - 100 * easeOutQuint(slowDownProgress);
-        }
+    // --- Actualización de la ruleta ---
+    const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
+    const wheelProgress = Math.min(progress / duration, 1);
+    const currentWheelAngle = easeOutQuint(wheelProgress) * totalRotation;
+    const lastWheelAngle = wheelAngle;
+    wheelAngle = currentWheelAngle;
+    const wheelAngularVelocity = wheelAngle - lastWheelAngle;
 
-        // Activa el efecto de zoom a mitad de la animación.
-        if (progress > zoomInTime) {
-            canvasWrapper.classList.add('zoomed');
-        }
+    // --- Actualización del motor de física ---
+    // Rota los pockets junto con la ruleta
+    pockets.forEach(p => Body.rotate(p, wheelAngularVelocity, { x: 0, y: 0 }));
+    // Aplica una fuerza centrípeta que aumenta con el tiempo para que la bola caiga.
+    const pullForce = 0.0005 * (progress / duration); // La fuerza aumenta con el tiempo
+    const pull = {
+        x: -ball.position.x * pullForce,
+        y: -ball.position.y * pullForce
+    };
+    Body.applyForce(ball, ball.position, pull);
+    // Actualiza el motor de física
+    Engine.update(engine, 1000 / 60);
 
-        drawWheel();
-        drawBall();
+    // --- Dibujado ---
+    drawWheel();
+    drawBall();
 
-        // Si la animación no ha terminado, solicita el siguiente frame.
-        if (progress < duration) {
-            requestAnimationFrame(animationStep);
-        } else {
-            // --- FIN DE LA ANIMACIÓN ---
-            // Se asegura de que la ruleta y la bola estén en la posición exacta.
-            wheelAngle = totalRotation; // La ruleta termina su rotación completa.
-            ballAngle = targetAngle; // La bola se posiciona exactamente en el ángulo del sector ganador.
-            ballRadius = 80; // La bola se queda en el radio interior, sobre el número.
-            drawWheel();
-            drawBall();
-            // Llama a la función que finaliza la lógica del giro.
-            finishSpin(result);
-        }
+    // --- Condición de fin ---
+    // Comprueba si la bola ha perdido casi toda su velocidad y está cerca del centro.
+    const speed = Matter.Vector.magnitude(ball.velocity);
+    const distFromCenter = Matter.Vector.magnitude(ball.position);
+
+    // La animación termina cuando la ruleta casi se ha detenido Y la bola ha perdido casi toda su velocidad.
+    if (wheelProgress >= 1 && speed < 0.05 && distFromCenter < 100) {
+        // La bola se ha asentado de forma natural.
+        isPhysicsRunning = false; // Detiene el bucle de animación
+        finishSpin(result);
+        return; // Termina el bucle de animación
     }
 
-    requestAnimationFrame(animationStep);
+    // Si la animación no ha terminado, solicita el siguiente frame.
+    // Damos un tiempo extra de seguridad para que la bola se asiente.
+    if (progress < duration + 4000) {
+      requestAnimationFrame(animationStep);
+    } else {
+      // Fallback de seguridad: si después de mucho tiempo no se para, forzamos el final.
+      isPhysicsRunning = false;
+      finishSpin(result);
+    }
+  }
+
+  requestAnimationFrame(animationStep);
 }
 
 /**
@@ -308,6 +348,11 @@ function animateToResult(result) {
  */
 function finishSpin(result) {
     const { number, color, win, newBalance } = result;
+
+    // Comprobamos si el giro ya ha sido finalizado para evitar ejecuciones múltiples.
+    if (!isSpinning) return;
+    isSpinning = false;
+    btnSpin.disabled = false; // Habilitamos el botón inmediatamente
 
     // Actualiza el saldo y la UI.
     balance = newBalance;
@@ -329,16 +374,15 @@ function finishSpin(result) {
 
     // Espera un momento antes de permitir un nuevo giro.
     setTimeout(() => {
-        isSpinning = false;
-        btnSpin.disabled = false;
         canvasWrapper.classList.remove('zoomed');
         // Si el modo auto-spin está activado, inicia un nuevo giro automáticamente.
         if (isAutoSpin) {
             spin();
         } else {
-            resultText.textContent = "Selecciona color y apuesta…";
+            resultText.textContent = "Realiza tu próxima apuesta...";
         }
-    }, 2500);
+        World.clear(world); // Limpia los cuerpos para el próximo giro
+    }, 3000);
 }
 
 /**
@@ -396,23 +440,26 @@ btnAuto.addEventListener('click', () => {
  * Configura el estado inicial del juego.
  */
 function init() {
-    // Inicia un bucle de animación "inactivo" que solo dibuja la ruleta y la bola en su estado estático.
-    // Bucle de animación base para cuando no está girando
+    // 1. Configura el motor de física
+    engine = Engine.create();
+    world = engine.world;
+    engine.world.gravity.y = 0; // Sin gravedad vertical
+
+    // 2. Inicia el bucle de dibujado principal
     function idleAnimation() {
-        if (!isSpinning) {
+        // Solo dibuja la ruleta estática si no está girando.
+        if (!isSpinning && !isPhysicsRunning) {
             drawWheel();
-            drawBall();
         }
         requestAnimationFrame(idleAnimation);
     }
 
+    // 3. Configura el resto de la UI
     createChips();
-    // Crea las fichas.
     updateUI();
-    // Actualiza la UI con los valores iniciales.
     idleAnimation();
 
-    // Selecciona el color 'rojo' y la apuesta de '$10' por defecto al cargar.
+    // 4. Selecciona valores por defecto
     document.querySelector('.color-btn[data-color="rojo"]').classList.add('selected');
     document.querySelector('.chip-btn[data-value="10"]').classList.add('selected');
 }
