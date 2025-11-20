@@ -218,24 +218,25 @@ function initPhysics() {
     world = engine.world;
     world.gravity.y = 0; // No queremos gravedad hacia abajo.
 
-    // Creamos el cuerpo de la ruleta: un objeto grande y pesado.
-    wheelBody = Bodies.circle(CENTER, CENTER, R_WHEEL, {
-        isStatic: true, // Es estático para que no se mueva por colisiones, lo rotamos manualmente.
-        frictionAir: 0.01, // Fricción del aire para que se detenga.
-        label: 'wheel'
-    });
-
-    // Creamos los separadores (pegs) entre los números.
+    // --- NUEVA LÓGICA: CUERPO COMPUESTO ---
+    // 1. Creamos los separadores (pegs) como cuerpos individuales.
     const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
     pegs = WHEEL_ORDER.map((_, i) => {
         const angle = i * anglePerSlice;
         const x = CENTER + Math.cos(angle) * (R_NUMBERS + 10);
         const y = CENTER + Math.sin(angle) * (R_NUMBERS + 10);
-        return Bodies.circle(x, y, 4, {
-            isStatic: true,
-            restitution: 0.5, // Rebote
-            label: 'peg'
-        });
+        // Les damos una etiqueta para detectar colisiones.
+        return Bodies.circle(x, y, 4, { label: 'peg', restitution: 0.5 });
+    });
+
+    // 2. Creamos el cuerpo principal de la ruleta y lo combinamos con los pegs.
+    const wheelDisc = Bodies.circle(CENTER, CENTER, R_WHEEL, { label: 'wheel' });
+    wheelBody = Body.create({
+        parts: [wheelDisc, ...pegs], // Combinamos el disco y los pegs en un solo cuerpo.
+        isStatic: false, // ¡Ahora es un cuerpo dinámico!
+        frictionAir: 0.005, // Fricción del aire para que desacelere suavemente.
+        inverseInertia: 0.00001, // Inercia muy alta para que no se frene con los choques de la bola.
+        label: 'wheel'
     });
 
     // Añadimos todo al mundo.
@@ -256,10 +257,6 @@ function initPhysics() {
         const force = { x: normalized.x * pullForce, y: normalized.y * pullForce };
         Body.applyForce(ballBody, ballBody.position, force);
 
-        // Rotamos los pegs junto con la ruleta.
-        Composite.rotate(wheelBody, wheelBody.angularSpeed, { x: CENTER, y: CENTER });
-        pegs.forEach(p => Body.rotate(p, wheelBody.angularSpeed, { x: CENTER, y: CENTER }));
-
         // Lógica para finalizar el giro de forma controlada.
         if (ballBody.speed < 0.2 && Matter.Vector.magnitude(vector) < R_BALL_TRACK - 20) {
             isGuiding = true;
@@ -270,7 +267,7 @@ function initPhysics() {
         }
 
         // Condición de fin de la animación.
-        if (isGuiding && wheelBody.angularSpeed < 0.0001 && ballBody.speed < 0.01) {
+        if (isGuiding && Math.abs(wheelBody.angularSpeed) < 0.0001 && ballBody.speed < 0.01) {
             spinning = false;
             isGuiding = false;
             Body.setAngularVelocity(wheelBody, 0); // Detener completamente.
@@ -312,7 +309,7 @@ function startPhysicsSpin() {
     World.add(world, ballBody);
     
     // Aplicamos fuerzas iniciales.
-    Body.setAngularVelocity(wheelBody, 0.15); // Velocidad angular a la ruleta.
+    Body.setAngularVelocity(wheelBody, 0.1); // Velocidad angular a la ruleta.
     // CORRECCIÓN: Reducimos la velocidad inicial para que no se salga de la pista.
     Body.setVelocity(ballBody, { x: -8, y: 0 }); // Velocidad lineal a la bola.
 }
@@ -322,7 +319,7 @@ function guideWheelToWinner() {
     const anglePerSlice = (2 * Math.PI) / WHEEL_ORDER.length;
     const targetAngle = -(winnerIndex * anglePerSlice) - (anglePerSlice / 2);
 
-    // Calculamos la diferencia de ángulo por el camino más corto.
+    // Calculamos la diferencia de ángulo por el camino más corto (considerando el ángulo actual del cuerpo).
     let angleDifference = targetAngle - (wheelBody.angle % (2 * Math.PI));
     if (angleDifference > Math.PI) angleDifference -= 2 * Math.PI;
     if (angleDifference < -Math.PI) angleDifference += 2 * Math.PI;
