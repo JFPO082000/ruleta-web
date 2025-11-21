@@ -1007,7 +1007,7 @@ only screen and (max-height: 550px) {
 	#container {
 		transform-origin: center center;
 		/* Reduced by 70% for mobile landscape */
-		transform: scale(calc(min(calc(100vw / 900), calc(100vh / 520)) * 0.30));
+		transform: scale(calc(min(calc(100vw / 900), calc(100vh / 520)) * 0.10));
 		height: auto;
 		margin: 0;
 	}
