@@ -1,55 +1,16 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <head>
-    <meta charset="UTF-8">
-    <title>Ruleta Casino – Web</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>Javascript Roulette</title>
+	<meta name="title" content="Javascript Roulette">
+	<meta name="description" content="A fully functioning roulette game made using Javascript and CSS">
+	<meta name="author" content="ozboware">
+	<meta property="og:url" content="/">
+	<meta property="og:title" content="Javascript Roulette">
+	<meta property="og:description" content="A fully functioning roulette game made using Javascript and CSS">
+	<link href="./assets/css/style.css" rel="stylesheet" type="text/css">
 </head>
+
 <body>
-
-    <h1 class="title">Ruleta Casino – Web</h1>
-
-    <div class="canvas-wrapper" id="canvasWrapper">
-        <canvas id="rgbCanvas" width="460" height="460"></canvas>
-        <canvas id="rouletteCanvas" width="460" height="460"></canvas>
-        <canvas id="ballCanvas" width="460" height="460"></canvas>
-    </div>
-
-    <div class="panel">
-
-        <div class="row">
-            <span class="label">Color:</span>
-            <button class="color-btn" id="btnRojo" data-color="rojo">ROJO</button>
-            <button class="color-btn" id="btnNegro" data-color="negro">NEGRO</button>
-            <button class="color-btn" id="btnVerde" data-color="verde">VERDE</button>
-        </div>
-
-        <div class="row">
-            <span class="label">Apuesta:</span>
-            <div id="chipsRow" class="chips"></div>
-        </div>
-
-        <div class="row">
-            <span class="label">Saldo:</span>
-            <span id="balance">$1000</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Historial:</span>
-            <span id="history"></span>
-        </div>
-
-        <div class="buttons">
-            <button id="btnSpin" class="action-btn">🎰 GIRAR</button>
-            <button id="btnAuto" class="action-btn secondary">AUTO SPIN: OFF</button>
-        </div>
-
-        <div id="resultText" class="result">Selecciona color y apuesta…</div>
-
-    </div>
-
-    <!-- Añadimos la biblioteca de físicas Matter.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-    <script src="/static/app.js"></script>
+	<script src="./assets/js/app.js"></script>
 </body>
-</html>
