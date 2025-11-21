@@ -13,6 +13,9 @@ let container = document.createElement('div');
 container.setAttribute('id', 'container');
 document.body.append(container);
 
+let wheel;
+let ballTrack;
+
 startGame();
 
 function resetGame(){
@@ -108,9 +111,9 @@ function buildWheel(){
 	turretHandle.append(thendTwo);
 	wheel.append(turretHandle);
 
-	// Mover la asignación aquí para asegurar que los elementos existen
-	this.wheel = wheel;
-	this.ballTrack = ballTrack;
+	// Asignar a las variables globales una vez creados los elementos
+	window.wheel = wheel;
+	window.ballTrack = ballTrack;
 	container.append(wheel);
 }
 
