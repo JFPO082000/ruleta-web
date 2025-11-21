@@ -907,86 +907,64 @@ only screen and (max-height: 550px) {
 		/* Prevent scrolling */
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		height: 100vh;
-		background-color: #016D29;
-	}
 
-	#container {
-		transform-origin: center center;
-		/* Calculate scale based on viewport size. 
-           Base size is approx 850px x 500px. 
-           We use a safe scale factor. 
-           Reduced by 15% as requested to make it smaller. */
-		transform: scale(calc(min(calc(100vw / 900), calc(100vh / 520)) * 0.85));
-		height: auto;
-		/* Allow height to be determined by content if needed, or keep fixed and scale */
-		/* Reset margins if any */
-		margin: 0;
-	}
-}
+		.orange {
+			border-color: orange;
+		}
 
-.red {
-	border-color: red;
-}
+		.blue {
+			border-color: blue;
+		}
 
-.orange {
-	border-color: orange;
-}
+		/* --- POSICIONAMIENTO DE LAS FICHAS EN EL TABLERO --- */
+		.tt1_block .chip {
+			margin-left: 19px;
+			margin-top: -24px;
+		}
 
-.blue {
-	border-color: blue;
-}
+		.number_block .chip {
+			margin-left: 7px;
+			margin-top: -24px;
+		}
 
-/* --- POSICIONAMIENTO DE LAS FICHAS EN EL TABLERO --- */
-.tt1_block .chip {
-	margin-left: 19px;
-	margin-top: -24px;
-}
+		.wlrtl .chip {
+			margin-left: -9px;
+			margin-top: 9px;
+		}
 
-.number_block .chip {
-	margin-left: 7px;
-	margin-top: -24px;
-}
+		.cbbb .chip {
+			margin-left: -4px;
+			margin-top: -5px;
+		}
 
-.wlrtl .chip {
-	margin-left: -9px;
-	margin-top: 9px;
-}
+		.ttbbetblock .chip {
+			margin-left: -7px;
+			margin-top: -8px;
+		}
 
-.cbbb .chip {
-	margin-left: -4px;
-	margin-top: -5px;
-}
+		#wlttb_top .chip {
+			margin-left: -5px;
+			margin-top: -8px;
+		}
 
-.ttbbetblock .chip {
-	margin-left: -7px;
-	margin-top: -8px;
-}
+		.bbtoptwo .chip {
+			margin-left: 108px;
+			margin-top: -25px;
+		}
 
-#wlttb_top .chip {
-	margin-left: -5px;
-	margin-top: -8px;
-}
+		.number_0 .chip {
+			margin-left: -8px;
+			margin-top: -22px;
+		}
 
-.bbtoptwo .chip {
-	margin-left: 108px;
-	margin-top: -25px;
-}
+		.bo3_block .chip {
+			margin-left: 65px;
+			margin-top: -26px;
+		}
 
-.number_0 .chip {
-	margin-left: -8px;
-	margin-top: -22px;
-}
+		.oto_block .chip {
+			margin-left: 45px;
+			margin-top: -25px;
+		}
 
-.bo3_block .chip {
-	margin-left: 65px;
-	margin-top: -26px;
-}
-
-.oto_block .chip {
-	margin-left: 45px;
-	margin-top: -25px;
-}
-
-/* --- FIN DE ESTILOS DE FICHAS --- */
+		/* --- FIN DE ESTILOS DE FICHAS --- */
