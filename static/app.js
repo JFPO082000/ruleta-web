@@ -111,9 +111,9 @@ function buildWheel(){
 	turretHandle.append(thendTwo);
 	wheel.append(turretHandle);
 
-	// Asignar a las variables globales una vez creados los elementos
-	window.wheel = wheel;
-	window.ballTrack = ballTrack;
+	// Asignar los elementos creados a las variables globales
+	self.wheel = wheel;
+	self.ballTrack = ballTrack;
 	container.append(wheel);
 }
 
