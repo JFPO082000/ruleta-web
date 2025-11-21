@@ -1,4 +1,5 @@
-html, body{
+/* --- ESTILOS GENERALES --- */
+html, body {
 	font-family: arial;
 	cursor: default;
 	-webkit-touch-callout: none;
@@ -9,7 +10,8 @@ html, body{
 	user-select: none;
 }
 
-#container{
+/* Contenedor principal de la aplicación */
+#container {
 	display: flex;
 	justify-content: center;
 	background-color: #016D29;
@@ -18,8 +20,9 @@ html, body{
 	color: #fff;
 }
 
-/*notification*/
-#notification{
+/* --- SECCIÓN DE NOTIFICACIONES --- */
+/* Estilo para el cuadro de notificación emergente (ej. "Bancarrota", "Ganaste") */
+#notification {
 	position: absolute;
 	width: 500px;
 	height: 318px;
@@ -30,6 +33,7 @@ html, body{
 	transition: 1s;
 }
 
+/* Estilo para el texto principal dentro de la notificación */
 .nSpan{
 	display: block;
 	position: relative;
@@ -38,6 +42,7 @@ html, body{
 	text-align: center;
 }
 
+/* Estilo para el botón dentro de la notificación (ej. "Jugar de nuevo") */
 .nBtn{
 	display: block;
 	position: relative;
@@ -54,6 +59,7 @@ html, body{
 	transition: .5s;
 }
 
+/* Efecto al presionar el botón de la notificación */
 .nBtn:active{
 	top: 118px;
 	left: calc(25% + 2px);
@@ -61,10 +67,11 @@ html, body{
 }
 
 .nsWin{
-	position:absolute;
+	position: absolute;
 	left: 4px;
 }
 
+/* Bloques de información de ganancia (Apuesta, Ganancia, Pago) */
 .nsWinBlock{
 	display: inline-block;
 	font-size: 21px;
@@ -73,19 +80,20 @@ html, body{
 	padding-left: 40px;
 	padding-right: 40px;
 }
-/*notification end*/
+/* --- FIN DE SECCIÓN DE NOTIFICACIONES --- */
 
-/*betting table*/
-#betting_board{
+/* --- TABLERO DE APUESTAS --- */
+/* Contenedor principal del tablero de apuestas */
+#betting_board {
 	width: 500px;
     height: 315px;
     border: 1px solid;
 }
 
 .bbtop{
-	margin-left:2px;
+	margin-left: 2px;
 }
-
+/* Bloques superiores de apuestas externas (1-18, 19-36) */
 .bbtoptwo{
 	width: calc(50% - 8px);
 	border: 1px solid;
@@ -93,14 +101,16 @@ html, body{
 	padding: 12px 4px;
 	margin-left: -2px;
 	text-align: center;
-	font-size:20px;
+	font-size: 20px;
 	font-weight: bold;
 }
 
+/* Contenedor para los números individuales en el tablero */
 .number_board{
 	margin-left: 1px;
 }
 
+/* Estilo para cada bloque de número individual */
 .number_block{
 	width: 39.94px;
     border: 1px solid;
@@ -110,6 +120,7 @@ html, body{
     padding: 32px 0px;
 }
 
+/* Estilo para el texto del número, rotado verticalmente */
 .nbn{
 	font-size: 20px;
 	font-weight: bold;
@@ -122,11 +133,13 @@ html, body{
 	filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 
+/* Contenedores para apuestas de docenas y otras apuestas externas */
 .bo3_board, .oto_board{
-	width:500px;
+	width: 500px;
 	margin-left: 1px;
 }
 
+/* Bloques de apuestas de docenas (1-12, etc.) y par/impar/rojo/negro */
 .bo3_block, .oto_block{
 	border: 1px solid;
 	display: inline-block;
@@ -143,6 +156,7 @@ html, body{
 	margin-left: -1.98px;
 }
 
+/* Estilo específico para el bloque del número 0 */
 .number_0{
 	position: absolute;
 	border: 2px solid;
@@ -153,6 +167,7 @@ html, body{
 	border-top-left-radius: 100%;
 }
 
+/* Estilo para los bloques de apuesta de columna "2 to 1" */
 .tt1_block{
 	border: 2px solid;
 	width: 65px;
@@ -162,6 +177,8 @@ html, body{
 	margin-top: -89.75px;
 }
 
+/* --- LÍNEAS DE APUESTA (CAPAS INVISIBLES PARA CLICS) --- */
+/* Contenedor para todas las líneas de apuesta (split, street, corner, etc.) */
 .winning_lines{
 	position: absolute;
 	margin-top: -137px;
@@ -169,6 +186,7 @@ html, body{
 	height: 0;
 }
 
+/* Líneas de apuesta horizontales (entre filas de números) */
 .wlttb{
 	position: relative;
 	width: 100%;
@@ -177,6 +195,7 @@ html, body{
 	top: 269px;
 }
 
+/* Posicionamiento específico para diferentes líneas horizontales */
 #wlttb_top{
     position: absolute;
     margin-top: -89px;
@@ -187,6 +206,7 @@ html, body{
     margin-top: 79px;
 }
 
+/* Líneas de apuesta verticales (entre números) */
 .wlrtl{
 	position: relative;
     display: inline-block;
@@ -196,6 +216,7 @@ html, body{
     margin-left: 37px;
 }
 
+/* Ajustes de posición para líneas verticales específicas */
 #wlrtl_2, #wlrtl_3, #wlrtl_6, #wlrtl_9, #wlrtl_11{
 	margin-left: 31px;
 }
@@ -203,6 +224,7 @@ html, body{
 	margin-left: 32px;
 }
 
+/* Contenedor para las áreas de clic de apuestas de esquina (corner bets) */
 .wlcb{
 	position: absolute;
 	width: 477px;
@@ -215,16 +237,18 @@ html, body{
 	top: 343px;
 }
 
+/* Bloque individual para una apuesta de esquina */
 .cbbb{
     width: 20px;
     height: 20px;
     position: relative;
 	display: inline-block;
-	margin-left:22px;
+	margin-left: 22px;
 	margin-top: 9.5px;
 	cursor: pointer;
 }
 
+/* Ajustes de posición para bloques de esquina específicos */
 #cbbb_1, #cbbb_4, #cbbb_5, #cbbb_7, #cbbb_9, #cbbb_11, #cbbb_12, #cbbb_15, #cbbb_16, #cbbb_18, #cbbb_20, #cbbb_22{
 	margin-left: 21px;
 }
@@ -241,6 +265,7 @@ html, body{
 	margin-left: 22px;
 }
 
+/* Bloque para apuestas de calle doble (double street) y otras apuestas horizontales */
 .ttbbetblock{
 	width: 19.1px;
 	height: 10px;
@@ -248,10 +273,11 @@ html, body{
 	display: inline-block;
 	margin-left: 22.52px;
 	top: -2px;
-	cursor:pointer;
-	z-index:3;
+	cursor: pointer;
+	z-index: 3;
 }
 
+/* Bloques para apuestas divididas (split bets) verticales */
 .rtlbb1, .rtlbb2, .rtlbb3{
 	height: 45px;
     margin-top: 23px;
@@ -262,6 +288,9 @@ html, body{
     margin-top: 42px;
 }
 
+/* --- FIN DE LÍNEAS DE APUESTA --- */
+
+/* Estilo del botón "SPIN" */
 .spinBtn{
 	position: absolute;
 	margin-top: 329px;
@@ -275,14 +304,17 @@ html, body{
 	font-weight: bold;
 }
 
+/* Clases de color para los números */
 .redNum{
 	background-color: #E0080B;
 }
-
 .blackNum{
 	background-color: #000;
 }
 
+/* --- SECCIÓN DE FICHAS Y BANCO --- */
+
+/* Contenedor para la selección de fichas y el área del banco/apuesta */
 .chipDeck, .bankContainer{
 	position: absolute;
 	margin-left: -383px;
@@ -295,10 +327,12 @@ html, body{
 	box-shadow: inset -2px -4px rgb(0 0 0 / 20%);
 }
 
+/* Posicionamiento específico para el contenedor del banco */
 .bankContainer{
 	margin-top: -21px;
 }
 
+/* Estilo de una ficha individual en el área de selección */
 .cdChip{
 	width: 27px;
     height: 27px;
@@ -311,6 +345,7 @@ html, body{
 	cursor: pointer;
 }
 
+/* Estilo para el valor numérico dentro de una ficha */
 .cdChipSpan{
 	display: inherit;
 	position: relative;
@@ -321,12 +356,14 @@ html, body{
 	text-align: center;
 }
 
+/* Estilo para la ficha activa/seleccionada */
 .cdChipActive{
 	position: relative;
 	top: -4px;
 	box-shadow: 0 4px rgb(0 0 0 / 20%);
 }
 
+/* Estilo para el botón "clear" que parece una ficha */
 .clearBet{
 	border-color:red;
 	background-color:red;
@@ -338,6 +375,7 @@ html, body{
 	margin-left:-2px;
 }
 
+/* Contenedores para mostrar el valor del banco y la apuesta actual */
 .bank, .bet{
 	display: inline-block;
 	width: calc(50% - 28px);
@@ -350,6 +388,7 @@ html, body{
     text-align: right;
 }
 
+/* Contenedor para el historial de números ganadores */
 .pnBlock{
 	position: absolute;
 	border: 1px solid;
@@ -359,6 +398,7 @@ html, body{
 	margin-left: -1px;
 }
 
+/* Contenido desplazable dentro del historial de números */
 #pnContent{
 	border: 4px solid #d5b714;
 	width: 485px;
@@ -369,9 +409,10 @@ html, body{
 	margin-top: 3px;
 	background-color: #fff;
 	color: #000;
-	overflow:hidden;
+	overflow: hidden;
 }
 
+/* Estilos para los números en el historial según su color */
 .pnRed, .pnBlack, .pnGreen{
 	position: relative;
 	display: inline;
@@ -385,9 +426,10 @@ html, body{
 }.pnGreen{
 	color: green;
 }
-/*betting table end*/
+/* --- FIN DE TABLERO DE APUESTAS --- */
 
-/*wheel*/
+/* --- ANIMACIONES Y RULETA --- */
+/* Animación para la rotación continua de la ruleta */
 @keyframes wheelRotate {
 	from {
 		transform: rotate(0deg);
@@ -396,6 +438,8 @@ html, body{
 		transform: rotate(359deg);
 	}
 }
+
+/* Animación para la rotación de la bola */
 @keyframes ballRotate {
 	from {
 		transform: rotate(0deg);
@@ -406,6 +450,7 @@ html, body{
 	animation-fill-mode: forwards;
 }
 
+/* Contenedor principal de la ruleta */
 .wheel {
 	height: 312px;
 	width: 312px;
@@ -413,6 +458,7 @@ html, body{
 	left: -75px;
 }
 	
+/* Pista por donde gira la bola */
 .ballTrack{
 	width: 212px;
 	height: 207px;
@@ -420,9 +466,10 @@ html, body{
 	left: 47.5px;
 	top: 50px;
 	border-radius: 100%;
-	z-index:2;
+	z-index: 2;
 }
 
+/* La bola */
 .ball{
 	background-color: #fff;
 	width: 16px;
@@ -433,6 +480,7 @@ html, body{
 	top: -8px;
 }
 	
+/* Torreta central decorativa de la ruleta */
 .turret{
 	border-radius: 100%;
 	background: radial-gradient( circle at 30% 30%, #f3c620, #1a1608 );
@@ -444,6 +492,7 @@ html, body{
 	z-index: 1;
 }
 	
+/* Mango de la torreta */
 .turretHandle{
 	background: radial-gradient( circle at 44%, #f3c620, #6a570f);
 	width: 87px;
@@ -453,6 +502,7 @@ html, body{
 	top: 148px;
 }
 
+/* Extremos decorativos del mango de la torreta */
 .thendOne, .thendTwo{
 	border-radius: 100%;
 	background: radial-gradient( circle at 30% 30%, #f3c620, #1a1608 );
@@ -471,6 +521,7 @@ html, body{
 	left: 83px;
 }
 
+/* Borde exterior dorado de la ruleta */
 .outerRim {
 	position: absolute;
 	left:0;
@@ -482,6 +533,7 @@ html, body{
 	border: 10px solid #F3c620;
 } 
 
+/* Bloque usado para crear una cuña de color en la ruleta. Se rota y se recorta. */
 .block {
 	transition: all 1s;
 	position: absolute;
@@ -491,6 +543,7 @@ html, body{
 	clip: rect(0px, 145px, 290px, 0px);
 }
 
+/* Sector que contiene un número y una cuña de color. Se rota para posicionar cada número. */
 .sect {
 	position: absolute;
 	top:10px;
@@ -501,6 +554,7 @@ html, body{
 	clip: rect(0px, 290px, 290px, 145px);
 }
 
+/* Estilos para los números en la ruleta (para números de 1 o 2 dígitos) */
 .double, .single{
 	position: absolute;
 	z-index: 1;
@@ -519,21 +573,26 @@ html, body{
 	margin-top: 4.5px;
 }
 
+/* --- DEFINICIÓN DE COLORES Y POSICIONES DE LOS SECTORES --- */
+/* El sector 1 es el 0 (verde) */
 #sect1 .block {
 	background-color: #016D29;
 	transform:rotate(9.73deg);
 }
     
+/* Sectores rojos */
 #sect2 .block, #sect4 .block, #sect6 .block, #sect8 .block, #sect10 .block, #sect12 .block, #sect14 .block, #sect16 .block, #sect18 .block, #sect20 .block, #sect22 .block, #sect24 .block, #sect26 .block, #sect28 .block, #sect30 .block, #sect32 .block, #sect34 .block, #sect36 .block {
 	background-color: #E0080B;
 	transform: rotate(9.73deg);
 }
 
+/* Sectores negros */
 #sect3 .block, #sect5 .block, #sect7 .block, #sect9 .block, #sect11 .block, #sect13 .block, #sect15 .block, #sect17 .block, #sect19 .block, #sect21 .block, #sect23 .block, #sect25 .block, #sect27 .block, #sect29 .block, #sect31 .block, #sect33 .block, #sect35 .block, #sect37 .block {
 	background-color: #000;
 	transform: rotate(9.73deg);
 }
 
+/* Rotación de cada sector para ubicarlo en su posición correcta en la ruleta (360 / 37 ≈ 9.73 grados por sector) */
 #sect2 {
 	transform: rotate(9.73deg);
 }
@@ -678,6 +737,7 @@ html, body{
 	transform: rotate(350.28deg);
 }
 
+/* Círculo interior oscuro que simula los "bolsillos" donde cae la bola */
 .pockets {
 	position: absolute;
 	top: 37px;
@@ -689,6 +749,7 @@ html, body{
 	opacity: .5;
 }
 
+/* Borde plateado alrededor del área de los bolsillos */
 .pocketsRim {
 	position: absolute;
 	top: 34px;
@@ -699,6 +760,7 @@ html, body{
 	border: 3px solid silver;
 }
 	
+/* Cono central decorativo de la ruleta */
 .cone {
 	position: absolute;
 	top: 62px;
@@ -709,16 +771,17 @@ html, body{
 	border-radius: 100%;
 	background: radial-gradient(circle at 100px 100px, #892c10, #000);
 }
-/*wheel end*/
+/* --- FIN DE RULETA --- */
 
-/*chip*/
+/* --- ESTILOS DE LAS FICHAS DE APUESTA (SOBRE EL TABLERO) --- */
+/* Estilo base para una ficha colocada en el tablero */
 .chip{
     width: 21px;
 	height: 21px;
 	background-color:#fff;
 	border: 3px solid;
 	border-radius: 100%;
-    position:absolute;
+    position: absolute;
 }
 
 .chipSpan{
@@ -731,6 +794,7 @@ html, body{
 	top: 4px;
 }
 
+/* Colores de borde para las fichas según su valor */
 .gold{
 	border-color:gold;
 }
@@ -747,6 +811,7 @@ html, body{
 	border-color:blue;
 }
 
+/* --- POSICIONAMIENTO DE LAS FICHAS EN EL TABLERO --- */
 .tt1_block .chip{
 	margin-left: 19px;
 	margin-top: -24px;
@@ -796,4 +861,4 @@ html, body{
 	margin-left: 45px;
 	margin-top: -25px;
 }
-/*chip end*/
+/* --- FIN DE ESTILOS DE FICHAS --- */
