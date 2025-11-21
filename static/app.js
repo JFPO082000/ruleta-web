@@ -54,7 +54,7 @@ function gameOver(){
 }
 
 function buildWheel(){
-	let wheel = document.createElement('div');
+	wheel = document.createElement('div');
 	wheel.setAttribute('class', 'wheel');
 
 	let outerRim = document.createElement('div');
@@ -82,7 +82,7 @@ function buildWheel(){
 	pocketsRim.setAttribute('class', 'pocketsRim');
 	wheel.append(pocketsRim);
 
-	let ballTrack = document.createElement('div');
+	ballTrack = document.createElement('div');
 	ballTrack.setAttribute('class', 'ballTrack');
 	let ball = document.createElement('div');
 	ball.setAttribute('class', 'ball');
@@ -111,9 +111,6 @@ function buildWheel(){
 	turretHandle.append(thendTwo);
 	wheel.append(turretHandle);
 
-	// Asignar los elementos creados a las variables globales2
-	self.wheel = wheel;
-	self.ballTrack = ballTrack;
 	container.append(wheel);
 }
 
@@ -617,6 +614,7 @@ function spinWheel(winningSpin){
 	}
 	wheel.style.cssText = 'animation: wheelRotate 5s linear infinite;';
 	ballTrack.style.cssText = 'animation: ballRotate 1s linear infinite;';
+	let style;
 
 	setTimeout(function(){
 		ballTrack.style.cssText = 'animation: ballRotate 2s linear infinite;';
@@ -626,14 +624,14 @@ function spinWheel(winningSpin){
 		document.head.appendChild(style);
 	}, 2000);
 	setTimeout(function(){
-		ballTrack.style.cssText = 'animation: ballStop 3s linear;';
+		ballTrack.style.cssText = 'animation: ballStop 3s linear forwards;';
 	}, 6000);
 	setTimeout(function(){
 		ballTrack.style.cssText = 'transform: rotate(-'+degree+'deg);';
 	}, 9000);
 	setTimeout(function(){
 		wheel.style.cssText = '';
-		style.remove();
+		if(style) style.remove();
 	}, 10000);
 }
 

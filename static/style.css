@@ -403,6 +403,7 @@ html, body{
 	to {
 		transform: rotate(-359deg);
 	}
+	animation-fill-mode: forwards;
 }
 
 .wheel {
