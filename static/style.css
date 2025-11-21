@@ -1,6 +1,5 @@
 /* --- ESTILOS GENERALES --- */
-html,
-body {
+html, body {
 	font-family: arial;
 	cursor: default;
 	-webkit-touch-callout: none;
@@ -35,7 +34,7 @@ body {
 }
 
 /* Estilo para el texto principal dentro de la notificación */
-.nSpan {
+.nSpan{
 	display: block;
 	position: relative;
 	top: 105px;
@@ -44,7 +43,7 @@ body {
 }
 
 /* Estilo para el botón dentro de la notificación (ej. "Jugar de nuevo") */
-.nBtn {
+.nBtn{
 	display: block;
 	position: relative;
 	top: 116px;
@@ -61,19 +60,19 @@ body {
 }
 
 /* Efecto al presionar el botón de la notificación */
-.nBtn:active {
+.nBtn:active{
 	top: 118px;
 	left: calc(25% + 2px);
 	box-shadow: 1px 2px rgb(0 0 0 / 25%);
 }
 
-.nsWin {
+.nsWin{
 	position: absolute;
 	left: 4px;
 }
 
 /* Bloques de información de ganancia (Apuesta, Ganancia, Pago) */
-.nsWinBlock {
+.nsWinBlock{
 	display: inline-block;
 	font-size: 21px;
 	border-right: 1px solid;
@@ -81,23 +80,21 @@ body {
 	padding-left: 40px;
 	padding-right: 40px;
 }
-
 /* --- FIN DE SECCIÓN DE NOTIFICACIONES --- */
 
 /* --- TABLERO DE APUESTAS --- */
 /* Contenedor principal del tablero de apuestas */
 #betting_board {
 	width: 500px;
-	height: 315px;
-	border: 1px solid;
+    height: 315px;
+    border: 1px solid;
 }
 
-.bbtop {
+.bbtop{
 	margin-left: 2px;
 }
-
 /* Bloques superiores de apuestas externas (1-18, 19-36) */
-.bbtoptwo {
+.bbtoptwo{
 	width: calc(50% - 8px);
 	border: 1px solid;
 	display: inline-block;
@@ -109,22 +106,22 @@ body {
 }
 
 /* Contenedor para los números individuales en el tablero */
-.number_board {
+.number_board{
 	margin-left: 1px;
 }
 
 /* Estilo para cada bloque de número individual */
-.number_block {
+.number_block{
 	width: 39.94px;
-	border: 1px solid;
-	text-align: center;
-	display: inline-block;
-	margin: 0 -0.2px;
-	padding: 32px 0px;
+    border: 1px solid;
+    text-align: center;
+    display: inline-block;
+    margin: 0 -0.2px;
+    padding: 32px 0px;
 }
 
 /* Estilo para el texto del número, rotado verticalmente */
-.nbn {
+.nbn{
 	font-size: 20px;
 	font-weight: bold;
 	letter-spacing: 2px;
@@ -137,15 +134,13 @@ body {
 }
 
 /* Contenedores para apuestas de docenas y otras apuestas externas */
-.bo3_board,
-.oto_board {
+.bo3_board, .oto_board{
 	width: 500px;
 	margin-left: 1px;
 }
 
 /* Bloques de apuestas de docenas (1-12, etc.) y par/impar/rojo/negro */
-.bo3_block,
-.oto_block {
+.bo3_block, .oto_block{
 	border: 1px solid;
 	display: inline-block;
 	padding: 8px 5px;
@@ -156,13 +151,13 @@ body {
 	font-size: 20px;
 }
 
-.oto_block {
+.oto_block{
 	width: 114.94px;
 	margin-left: -1.98px;
 }
 
 /* Estilo específico para el bloque del número 0 */
-.number_0 {
+.number_0{
 	position: absolute;
 	border: 2px solid;
 	margin-left: -57px;
@@ -173,7 +168,7 @@ body {
 }
 
 /* Estilo para los bloques de apuesta de columna "2 to 1" */
-.tt1_block {
+.tt1_block{
 	border: 2px solid;
 	width: 65px;
 	position: absolute;
@@ -184,7 +179,7 @@ body {
 
 /* --- LÍNEAS DE APUESTA (CAPAS INVISIBLES PARA CLICS) --- */
 /* Contenedor para todas las líneas de apuesta (split, street, corner, etc.) */
-.winning_lines {
+.winning_lines{
 	position: absolute;
 	margin-top: -137px;
 	width: 603px;
@@ -192,55 +187,45 @@ body {
 }
 
 /* Líneas de apuesta horizontales (entre filas de números) */
-.wlttb {
+.wlttb{
 	position: relative;
 	width: 100%;
-	height: 10px;
-	margin-left: -7.75px;
+    height: 10px;
+    margin-left: -7.75px;
 	top: 269px;
 }
 
 /* Posicionamiento específico para diferentes líneas horizontales */
-#wlttb_top {
-	position: absolute;
-	margin-top: -89px;
-	margin-left: 11px;
+#wlttb_top{
+    position: absolute;
+    margin-top: -89px;
+    margin-left: 11px;
 }
 
-#wlttb_2,
-#wlttb_3 {
-	margin-top: 79px;
+#wlttb_2, #wlttb_3{
+    margin-top: 79px;
 }
 
 /* Líneas de apuesta verticales (entre números) */
-.wlrtl {
+.wlrtl{
 	position: relative;
-	display: inline-block;
-	width: 10px;
-	height: 266px;
-	top: -3px;
-	margin-left: 37px;
+    display: inline-block;
+    width: 10px;
+    height: 266px;
+    top: -3px;
+    margin-left: 37px;
 }
 
 /* Ajustes de posición para líneas verticales específicas */
-#wlrtl_2,
-#wlrtl_3,
-#wlrtl_6,
-#wlrtl_9,
-#wlrtl_11 {
+#wlrtl_2, #wlrtl_3, #wlrtl_6, #wlrtl_9, #wlrtl_11{
 	margin-left: 31px;
 }
-
-#wlrtl_4,
-#wlrtl_5,
-#wlrtl_7,
-#wlrtl_8,
-#wlrtl_10 {
+#wlrtl_4, #wlrtl_5, #wlrtl_7, #wlrtl_8, #wlrtl_10{
 	margin-left: 32px;
 }
 
 /* Contenedor para las áreas de clic de apuestas de esquina (corner bets) */
-.wlcb {
+.wlcb{
 	position: absolute;
 	width: 477px;
 	height: 41px;
@@ -248,15 +233,15 @@ body {
 	margin-left: 13px;
 }
 
-#wlcb_2 {
+#wlcb_2{
 	top: 343px;
 }
 
 /* Bloque individual para una apuesta de esquina */
-.cbbb {
-	width: 20px;
-	height: 20px;
-	position: relative;
+.cbbb{
+    width: 20px;
+    height: 20px;
+    position: relative;
 	display: inline-block;
 	margin-left: 22px;
 	margin-top: 9.5px;
@@ -264,40 +249,24 @@ body {
 }
 
 /* Ajustes de posición para bloques de esquina específicos */
-#cbbb_1,
-#cbbb_4,
-#cbbb_5,
-#cbbb_7,
-#cbbb_9,
-#cbbb_11,
-#cbbb_12,
-#cbbb_15,
-#cbbb_16,
-#cbbb_18,
-#cbbb_20,
-#cbbb_22 {
+#cbbb_1, #cbbb_4, #cbbb_5, #cbbb_7, #cbbb_9, #cbbb_11, #cbbb_12, #cbbb_15, #cbbb_16, #cbbb_18, #cbbb_20, #cbbb_22{
 	margin-left: 21px;
 }
 
-#cbbb_3,
-#cbbb_14 {
+#cbbb_3, #cbbb_14{
 	margin-left: 20.5px;
 }
 
-#cbbb_6,
-#cbbb_17 {
+#cbbb_6, #cbbb_17{
 	margin-left: 23px;
 }
 
-#cbbb_8,
-#cbbb_10,
-#cbbb_19,
-#cbbb_21 {
+#cbbb_8, #cbbb_10, #cbbb_19, #cbbb_21{
 	margin-left: 22px;
 }
 
 /* Bloque para apuestas de calle doble (double street) y otras apuestas horizontales */
-.ttbbetblock {
+.ttbbetblock{
 	width: 19.1px;
 	height: 10px;
 	position: relative;
@@ -309,23 +278,20 @@ body {
 }
 
 /* Bloques para apuestas divididas (split bets) verticales */
-.rtlbb1,
-.rtlbb2,
-.rtlbb3 {
+.rtlbb1, .rtlbb2, .rtlbb3{
 	height: 45px;
-	margin-top: 23px;
+    margin-top: 23px;
 	width: 10px;
 }
 
-.rtlbb2,
-.rtlbb3 {
-	margin-top: 42px;
+.rtlbb2, .rtlbb3{
+    margin-top: 42px;
 }
 
 /* --- FIN DE LÍNEAS DE APUESTA --- */
 
 /* Estilo del botón "SPIN" */
-.spinBtn {
+.spinBtn{
 	position: absolute;
 	margin-top: 329px;
 	margin-left: -392px;
@@ -339,24 +305,22 @@ body {
 }
 
 /* Clases de color para los números */
-.redNum {
+.redNum{
 	background-color: #E0080B;
 }
-
-.blackNum {
+.blackNum{
 	background-color: #000;
 }
 
 /* --- SECCIÓN DE FICHAS Y BANCO --- */
 
 /* Contenedor para la selección de fichas y el área del banco/apuesta */
-.chipDeck,
-.bankContainer {
+.chipDeck, .bankContainer{
 	position: absolute;
 	margin-left: -383px;
 	margin-top: -74px;
 	width: 310px;
-	height: 39px;
+	height:39px;
 	padding: 3px 0;
 	border: 1px solid;
 	border-radius: 10px;
@@ -364,25 +328,25 @@ body {
 }
 
 /* Posicionamiento específico para el contenedor del banco */
-.bankContainer {
+.bankContainer{
 	margin-top: -21px;
 }
 
 /* Estilo de una ficha individual en el área de selección */
-.cdChip {
+.cdChip{
 	width: 27px;
-	height: 27px;
-	background-color: #fff;
-	border: 5px solid;
-	border-radius: 100%;
-	display: inline-block;
-	margin-left: 9px;
-	color: #000;
+    height: 27px;
+    background-color: #fff;
+    border: 5px solid;
+    border-radius: 100%;
+    display: inline-block;
+    margin-left: 9px;
+    color: #000;
 	cursor: pointer;
 }
 
 /* Estilo para el valor numérico dentro de una ficha */
-.cdChipSpan {
+.cdChipSpan{
 	display: inherit;
 	position: relative;
 	top: 5px;
@@ -393,40 +357,39 @@ body {
 }
 
 /* Estilo para la ficha activa/seleccionada */
-.cdChipActive {
+.cdChipActive{
 	position: relative;
 	top: -4px;
 	box-shadow: 0 4px rgb(0 0 0 / 20%);
 }
 
 /* Estilo para el botón "clear" que parece una ficha */
-.clearBet {
-	border-color: red;
-	background-color: red;
-	color: #fff;
-	margin-left: 22px;
+.clearBet{
+	border-color:red;
+	background-color:red;
+	color:#fff;
+	margin-left:22px;
 }
 
-.clearBet .cdChipSpan {
-	margin-left: -2px;
+.clearBet .cdChipSpan{
+	margin-left:-2px;
 }
 
 /* Contenedores para mostrar el valor del banco y la apuesta actual */
-.bank,
-.bet {
+.bank, .bet{
 	display: inline-block;
 	width: calc(50% - 28px);
-	background-color: #000;
-	font-size: 18px;
-	margin-left: 7px;
-	padding: 5px;
-	border: 4px solid silver;
-	border-radius: 7px;
-	text-align: right;
+    background-color: #000;
+    font-size: 18px;
+    margin-left: 7px;
+    padding: 5px;
+    border: 4px solid silver;
+    border-radius: 7px;
+    text-align: right;
 }
 
 /* Contenedor para el historial de números ganadores */
-.pnBlock {
+.pnBlock{
 	position: absolute;
 	border: 1px solid;
 	width: 500px;
@@ -436,7 +399,7 @@ body {
 }
 
 /* Contenido desplazable dentro del historial de números */
-#pnContent {
+#pnContent{
 	border: 4px solid #d5b714;
 	width: 485px;
 	height: 31px;
@@ -450,28 +413,19 @@ body {
 }
 
 /* Estilos para los números en el historial según su color */
-.pnRed,
-.pnBlack,
-.pnGreen {
+.pnRed, .pnBlack, .pnGreen{
 	position: relative;
 	display: inline;
-	padding: 10px;
+	padding:10px;
 	font-size: 19px;
 	top: 5px;
-}
-
-.pnRed {
+}.pnRed{
 	color: red;
-}
-
-.pnBlack {
+}.pnBlack{
 	color: black;
-}
-
-.pnGreen {
+}.pnGreen{
 	color: green;
 }
-
 /* --- FIN DE TABLERO DE APUESTAS --- */
 
 /* --- ANIMACIONES Y RULETA --- */
@@ -480,7 +434,6 @@ body {
 	from {
 		transform: rotate(0deg);
 	}
-
 	to {
 		transform: rotate(359deg);
 	}
@@ -491,11 +444,9 @@ body {
 	from {
 		transform: rotate(0deg);
 	}
-
 	to {
 		transform: rotate(-359deg);
 	}
-
 	animation-fill-mode: forwards;
 }
 
@@ -506,9 +457,9 @@ body {
 	position: relative;
 	left: -75px;
 }
-
+	
 /* Pista por donde gira la bola */
-.ballTrack {
+.ballTrack{
 	width: 212px;
 	height: 207px;
 	position: absolute;
@@ -519,7 +470,7 @@ body {
 }
 
 /* La bola */
-.ball {
+.ball{
 	background-color: #fff;
 	width: 16px;
 	height: 16px;
@@ -528,11 +479,11 @@ body {
 	left: 109px;
 	top: -8px;
 }
-
+	
 /* Torreta central decorativa de la ruleta */
-.turret {
+.turret{
 	border-radius: 100%;
-	background: radial-gradient(circle at 30% 30%, #f3c620, #1a1608);
+	background: radial-gradient( circle at 30% 30%, #f3c620, #1a1608 );
 	width: 45px;
 	height: 45px;
 	position: absolute;
@@ -540,10 +491,10 @@ body {
 	left: 134px;
 	z-index: 1;
 }
-
+	
 /* Mango de la torreta */
-.turretHandle {
-	background: radial-gradient(circle at 44%, #f3c620, #6a570f);
+.turretHandle{
+	background: radial-gradient( circle at 44%, #f3c620, #6a570f);
 	width: 87px;
 	height: 14px;
 	position: absolute;
@@ -552,21 +503,20 @@ body {
 }
 
 /* Extremos decorativos del mango de la torreta */
-.thendOne,
-.thendTwo {
+.thendOne, .thendTwo{
 	border-radius: 100%;
-	background: radial-gradient(circle at 30% 30%, #f3c620, #1a1608);
+	background: radial-gradient( circle at 30% 30%, #f3c620, #1a1608 );
 	width: 25px;
 	height: 25px;
 	position: absolute;
 }
 
-.thendOne {
+.thendOne{
 	top: -6px;
 	left: -20px;
 }
 
-.thendTwo {
+.thendTwo{
 	top: -6px;
 	left: 83px;
 }
@@ -574,14 +524,14 @@ body {
 /* Borde exterior dorado de la ruleta */
 .outerRim {
 	position: absolute;
-	left: 0;
-	top: 0;
+	left:0;
+	top:0;
 	width: 290px;
 	height: 290px;
 	border-radius: 100%;
-	box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
+	box-shadow: 0px 0px 8px rgba(0,0,0,0.5);
 	border: 10px solid #F3c620;
-}
+} 
 
 /* Bloque usado para crear una cuña de color en la ruleta. Se rota y se recorta. */
 .block {
@@ -596,8 +546,8 @@ body {
 /* Sector que contiene un número y una cuña de color. Se rota para posicionar cada número. */
 .sect {
 	position: absolute;
-	top: 10px;
-	left: 10px;
+	top:10px;
+	left:10px;
 	width: 290px;
 	height: 290px;
 	border-radius: 100%;
@@ -605,8 +555,7 @@ body {
 }
 
 /* Estilos para los números en la ruleta (para números de 1 o 2 dígitos) */
-.double,
-.single {
+.double, .single{
 	position: absolute;
 	z-index: 1;
 	color: #fff;
@@ -614,12 +563,12 @@ body {
 	transform: rotate(3deg);
 }
 
-.double {
+.double{
 	left: 148px;
 	margin-top: 4.5px;
 }
 
-.single {
+.single{
 	left: 152px;
 	margin-top: 4.5px;
 }
@@ -628,51 +577,17 @@ body {
 /* El sector 1 es el 0 (verde) */
 #sect1 .block {
 	background-color: #016D29;
-	transform: rotate(9.73deg);
+	transform:rotate(9.73deg);
 }
-
+    
 /* Sectores rojos */
-#sect2 .block,
-#sect4 .block,
-#sect6 .block,
-#sect8 .block,
-#sect10 .block,
-#sect12 .block,
-#sect14 .block,
-#sect16 .block,
-#sect18 .block,
-#sect20 .block,
-#sect22 .block,
-#sect24 .block,
-#sect26 .block,
-#sect28 .block,
-#sect30 .block,
-#sect32 .block,
-#sect34 .block,
-#sect36 .block {
+#sect2 .block, #sect4 .block, #sect6 .block, #sect8 .block, #sect10 .block, #sect12 .block, #sect14 .block, #sect16 .block, #sect18 .block, #sect20 .block, #sect22 .block, #sect24 .block, #sect26 .block, #sect28 .block, #sect30 .block, #sect32 .block, #sect34 .block, #sect36 .block {
 	background-color: #E0080B;
 	transform: rotate(9.73deg);
 }
 
 /* Sectores negros */
-#sect3 .block,
-#sect5 .block,
-#sect7 .block,
-#sect9 .block,
-#sect11 .block,
-#sect13 .block,
-#sect15 .block,
-#sect17 .block,
-#sect19 .block,
-#sect21 .block,
-#sect23 .block,
-#sect25 .block,
-#sect27 .block,
-#sect29 .block,
-#sect31 .block,
-#sect33 .block,
-#sect35 .block,
-#sect37 .block {
+#sect3 .block, #sect5 .block, #sect7 .block, #sect9 .block, #sect11 .block, #sect13 .block, #sect15 .block, #sect17 .block, #sect19 .block, #sect21 .block, #sect23 .block, #sect25 .block, #sect27 .block, #sect29 .block, #sect31 .block, #sect33 .block, #sect35 .block, #sect37 .block {
 	background-color: #000;
 	transform: rotate(9.73deg);
 }
@@ -844,7 +759,7 @@ body {
 	border-radius: 100%;
 	border: 3px solid silver;
 }
-
+	
 /* Cono central decorativo de la ruleta */
 .cone {
 	position: absolute;
@@ -856,21 +771,20 @@ body {
 	border-radius: 100%;
 	background: radial-gradient(circle at 100px 100px, #892c10, #000);
 }
-
 /* --- FIN DE RULETA --- */
 
 /* --- ESTILOS DE LAS FICHAS DE APUESTA (SOBRE EL TABLERO) --- */
 /* Estilo base para una ficha colocada en el tablero */
-.chip {
-	width: 21px;
+.chip{
+    width: 21px;
 	height: 21px;
-	background-color: #fff;
+	background-color:#fff;
 	border: 3px solid;
 	border-radius: 100%;
-	position: absolute;
+    position: absolute;
 }
 
-.chipSpan {
+.chipSpan{
 	color: #000;
 	font-weight: bold;
 	font-size: 11px;
@@ -881,134 +795,107 @@ body {
 }
 
 /* Colores de borde para las fichas según su valor */
-.gold {
-	border-color: gold;
+.gold{
+	border-color:gold;
 }
 
-.blue {
-	border-color: #0059ff;
+.blue{
+	border-color:#0059ff;
 }
 
-.orange {
-	border-color: orange;
+.orange{
+	border-color:orange;
 }
 
-.purple {
-	border-color: purple;
+.purple{
+	border-color:purple;
 }
 
 /* --- MOBILE LANDSCAPE ADAPTATION --- */
-@media only screen and (max-width: 900px),
-only screen and (max-height: 550px) {
-	body {
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
-		/* Prevent scrolling */
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 100vh;
-		background-color: #016D29;
-	}
+@media only screen and (max-width: 900px), only screen and (max-height: 550px) {
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent scrolling */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #016D29;
+    }
 
-	#container {
-		transform-origin: center center;
-		/* Calculate scale based on viewport size. 
+    #container {
+        transform-origin: center center;
+        /* Calculate scale based on viewport size. 
            Base size is approx 850px x 500px. 
            We use a safe scale factor. */
-		transform: scale(min(calc(100vw / 900), calc(100vh / 520)));
-		height: auto;
-		/* Allow height to be determined by content if needed, or keep fixed and scale */
-		/* Reset margins if any */
-		margin: 0;
-	}
+        transform: scale(min(calc(100vw / 900), calc(100vh / 520)));
+        height: auto; /* Allow height to be determined by content if needed, or keep fixed and scale */
+        /* Reset margins if any */
+        margin: 0;
+    }
 }
 
-.red {
-	border-color: red;
+.red{
+	border-color:red;
 }
 
-.orange {
-	border-color: orange;
+.orange{
+	border-color:orange;
 }
 
-.blue {
-	border-color: blue;
+.blue{
+	border-color:blue;
 }
 
 /* --- POSICIONAMIENTO DE LAS FICHAS EN EL TABLERO --- */
-.tt1_block .chip {
+.tt1_block .chip{
 	margin-left: 19px;
 	margin-top: -24px;
 }
 
-.number_block .chip {
+.number_block .chip{
 	margin-left: 7px;
 	margin-top: -24px;
 }
 
-.wlrtl .chip {
+.wlrtl .chip{
 	margin-left: -9px;
 	margin-top: 9px;
 }
 
-.cbbb .chip {
+.cbbb .chip{
 	margin-left: -4px;
 	margin-top: -5px;
 }
 
-.ttbbetblock .chip {
+.ttbbetblock .chip{
 	margin-left: -7px;
 	margin-top: -8px;
 }
 
-#wlttb_top .chip {
+#wlttb_top .chip{
 	margin-left: -5px;
 	margin-top: -8px;
 }
 
-.bbtoptwo .chip {
+.bbtoptwo .chip{
 	margin-left: 108px;
 	margin-top: -25px;
 }
 
-.number_0 .chip {
+.number_0 .chip{
 	margin-left: -8px;
 	margin-top: -22px;
 }
 
-.bo3_block .chip {
+.bo3_block .chip{
 	margin-left: 65px;
 	margin-top: -26px;
 }
 
-.oto_block .chip {
+.oto_block .chip{
 	margin-left: 45px;
 	margin-top: -25px;
 }
-
 /* --- FIN DE ESTILOS DE FICHAS --- */
-
-/* --- MOBILE LANDSCAPE ADAPTATION --- */
-@media only screen and (max-width: 900px),
-only screen and (max-height: 550px) {
-	body {
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 100vh;
-		background-color: #016D29;
-	}
-
-	#container {
-		transform-origin: center center;
-		/* Reduced by 70% for mobile landscape */
-		transform: scale(calc(min(calc(100vw / 900), calc(100vh / 520)) * 0.10));
-		height: auto;
-		margin: 0;
-	}
-}
