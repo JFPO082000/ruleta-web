@@ -15,9 +15,6 @@ document.body.append(container);
 
 startGame();
 
-let wheel = document.getElementsByClassName('wheel')[0];
-let ballTrack = document.getElementsByClassName('ballTrack')[0];
-
 function resetGame(){
 	bankValue = 1000;
 	currentBet = 0;
@@ -111,6 +108,9 @@ function buildWheel(){
 	turretHandle.append(thendTwo);
 	wheel.append(turretHandle);
 
+	// Mover la asignación aquí para asegurar que los elementos existen
+	this.wheel = wheel;
+	this.ballTrack = ballTrack;
 	container.append(wheel);
 }
 
