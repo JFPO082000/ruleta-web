@@ -15,20 +15,20 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	background-color: #202020;
+	background-color: #000;
 	background-image: url('/static/pattern-bg.jpg');
 	background-repeat: repeat;
-	background-size: 400px 400px;
+	background-size: 300px 300px;
 }
 
 /* Contenedor principal de la aplicación */
 #container {
 	display: flex;
 	justify-content: center;
-	background-color: transparent;
+	background-color: #016D29;
 	height: 470px;
 	padding: 20px;
-	color: #ab925c;
+	color: #fff;
 }
 
 /* --- SECCIÓN DE NOTIFICACIONES --- */
@@ -37,12 +37,12 @@ body {
 	position: absolute;
 	width: 500px;
 	height: 318px;
-	background-color: #202020;
+	background-color: #000;
 	z-index: 10;
-	border: 8px solid #ab925c;
+	border: 8px solid #d3b201;
 	border-radius: 12px;
 	transition: 1s;
-	color: #ab925c;
+	color: #fff;
 }
 
 /* Estilo para el texto principal dentro de la notificación */
@@ -64,8 +64,8 @@ body {
 	padding: 10px;
 	font-size: 32px;
 	text-align: center;
-	background-color: #ab925c;
-	color: #202020;
+	background-color: #fff;
+	color: #000;
 	font-weight: bold;
 	border-radius: 15px;
 	box-shadow: 3px 4px rgb(0 0 0 / 25%);
@@ -344,10 +344,10 @@ body {
 	margin-left: -392px;
 	font-size: 15px;
 	cursor: pointer;
-	background-color: #ab925c;
+	background-color: #fff;
 	padding: 10px 5px;
 	border-radius: 100%;
-	color: #202020;
+	color: #000;
 	font-weight: bold;
 }
 
@@ -357,7 +357,7 @@ body {
 }
 
 .blackNum {
-	background-color: #ab925c;
+	background-color: #fff;
 }
 
 /* --- SECCIÓN DE FICHAS Y BANCO --- */
@@ -385,12 +385,12 @@ body {
 .cdChip {
 	width: 27px;
 	height: 27px;
-	background-color: #202020;
+	background-color: #000;
 	border: 5px solid;
 	border-radius: 100%;
 	display: inline-block;
 	margin-left: 9px;
-	color: #ab925c;
+	color: #fff;
 	cursor: pointer;
 }
 
@@ -416,7 +416,7 @@ body {
 .clearBet {
 	border-color: red;
 	background-color: red;
-	color: #ab925c;
+	color: #fff;
 	margin-left: 22px;
 }
 
@@ -429,13 +429,13 @@ body {
 .bet {
 	display: inline-block;
 	width: calc(50% - 28px);
-	background-color: #ab925c;
+	background-color: #fff;
 	font-size: 18px;
 	margin-left: 7px;
 	padding: 5px;
-	border: 4px solid #ab925c;
+	border: 4px solid #d5b714;
 	border-radius: 7px;
-	color: #ab925c;
+	color: #fff;
 	text-align: right;
 }
 
@@ -451,15 +451,15 @@ body {
 
 /* Contenido desplazable dentro del historial de números */
 #pnContent {
-	border: 4px solid #ab925c;
+	border: 4px solid #d5b714;
 	width: 485px;
 	height: 31px;
 	position: relative;
 	display: block;
 	margin-left: 4px;
 	margin-top: 3px;
-	background-color: #202020;
-	color: #ab925c;
+	background-color: #000;
+	color: #fff;
 	overflow: hidden;
 }
 
@@ -483,7 +483,7 @@ body {
 }
 
 .pnGreen {
-	color: #ab925c;
+	color: #fff;
 }
 
 /* --- FIN DE TABLERO DE APUESTAS --- */
@@ -534,7 +534,7 @@ body {
 
 /* La bola */
 .ball {
-	background-color: #202020;
+	background-color: #000;
 	width: 16px;
 	height: 16px;
 	border-radius: 100%;
@@ -546,7 +546,7 @@ body {
 /* Torreta central decorativa de la ruleta */
 .turret {
 	border-radius: 100%;
-	background: radial-gradient(circle at 30% 30%, #ab925c, #1a1608);
+	background: radial-gradient(circle at 30% 30%, #f3c620, #1a1608);
 	width: 45px;
 	height: 45px;
 	position: absolute;
@@ -557,7 +557,7 @@ body {
 
 /* Mango de la torreta */
 .turretHandle {
-	background: radial-gradient(circle at 44%, #ab925c, #6a570f);
+	background: radial-gradient(circle at 44%, #f3c620, #6a570f);
 	width: 87px;
 	height: 14px;
 	position: absolute;
@@ -569,7 +569,7 @@ body {
 .thendOne,
 .thendTwo {
 	border-radius: 100%;
-	background: radial-gradient(circle at 30% 30%, #ab925c, #1a1608);
+	background: radial-gradient(circle at 30% 30%, #f3c620, #1a1608);
 	width: 25px;
 	height: 25px;
 	position: absolute;
@@ -594,7 +594,7 @@ body {
 	height: 290px;
 	border-radius: 100%;
 	box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
-	border: 10px solid #ab925c;
+	border: 10px solid #F3c620;
 }
 
 /* Bloque usado para crear una cuña de color en la ruleta. Se rota y se recorta. */
@@ -623,7 +623,7 @@ body {
 .single {
 	position: absolute;
 	z-index: 1;
-	color: #ab925c;
+	color: #fff;
 	font-size: 14px;
 	transform: rotate(3deg);
 }
@@ -641,7 +641,7 @@ body {
 /* --- DEFINICIÓN DE COLORES Y POSICIONES DE LOS SECTORES --- */
 /* El sector 1 es el 0 (verde) */
 #sect1 .block {
-	background-color: #202020;
+	background-color: #000;
 	transform: rotate(9.73deg);
 }
 
@@ -687,7 +687,7 @@ body {
 #sect33 .block,
 #sect35 .block,
 #sect37 .block {
-	background-color: #ab925c;
+	background-color: #fff;
 	transform: rotate(9.73deg);
 }
 
@@ -843,7 +843,7 @@ body {
 	left: 37px;
 	width: 235px;
 	height: 235px;
-	background-color: #ab925c;
+	background-color: #fff;
 	border-radius: 100%;
 	opacity: .5;
 }
@@ -856,7 +856,7 @@ body {
 	width: 235px;
 	height: 235px;
 	border-radius: 100%;
-	border: 3px solid #ab925c;
+	border: 3px solid silver;
 }
 
 /* Cono central decorativo de la ruleta */
@@ -878,14 +878,14 @@ body {
 .chip {
 	width: 21px;
 	height: 21px;
-	background-color: #202020;
+	background-color: #000;
 	border: 3px solid;
 	border-radius: 100%;
 	position: absolute;
 }
 
 .chipSpan {
-	color: #ab925c;
+	color: #fff;
 	font-weight: bold;
 	font-size: 11px;
 	position: relative;
@@ -923,7 +923,7 @@ only screen and (max-height: 550px) {
 		align-items: center;
 		justify-content: center;
 		height: 100vh;
-		background-color: #202020;
+		background-color: #000;
 	}
 
 	#container {
