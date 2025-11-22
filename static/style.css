@@ -1,4 +1,4 @@
-/* --- ESCAL ADO GLOBAL PARA REDUCIR TAMA√ëO --- */
+/* --- ESCAL ADO GLOBAL PARA REDUCIR TAMA—O --- */
 body {
 	transform: scale(0.70);
 	transform-origin: top center;
@@ -15,32 +15,37 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	background-color: #202020;
+	background-image: url('/static/pattern-bg.jpg');
+	background-repeat: repeat;
+	background-size: 400px 400px;
 }
 
-/* Contenedor principal de la aplicaci√≥n */
+/* Contenedor principal de la aplicaciÛn */
 #container {
 	display: flex;
 	justify-content: center;
-	background-color: #016D29;
+	background-color: transparent;
 	height: 470px;
 	padding: 20px;
-	color: #fff;
+	color: #ab925c;
 }
 
-/* --- SECCI√ìN DE NOTIFICACIONES --- */
-/* Estilo para el cuadro de notificaci√≥n emergente (ej. "Bancarrota", "Ganaste") */
+/* --- SECCI”N DE NOTIFICACIONES --- */
+/* Estilo para el cuadro de notificaciÛn emergente (ej. "Bancarrota", "Ganaste") */
 #notification {
 	position: absolute;
 	width: 500px;
 	height: 318px;
-	background-color: #ad0205;
+	background-color: #202020;
 	z-index: 10;
-	border: 8px solid #d3b201;
+	border: 8px solid #ab925c;
 	border-radius: 12px;
 	transition: 1s;
+	color: #ab925c;
 }
 
-/* Estilo para el texto principal dentro de la notificaci√≥n */
+/* Estilo para el texto principal dentro de la notificaciÛn */
 .nSpan {
 	display: block;
 	position: relative;
@@ -49,7 +54,7 @@ body {
 	text-align: center;
 }
 
-/* Estilo para el bot√≥n dentro de la notificaci√≥n (ej. "Jugar de nuevo") */
+/* Estilo para el botÛn dentro de la notificaciÛn (ej. "Jugar de nuevo") */
 .nBtn {
 	display: block;
 	position: relative;
@@ -59,14 +64,16 @@ body {
 	padding: 10px;
 	font-size: 32px;
 	text-align: center;
-	background-color: green;
+	background-color: #ab925c;
+	color: #202020;
+	font-weight: bold;
 	border-radius: 15px;
 	box-shadow: 3px 4px rgb(0 0 0 / 25%);
 	cursor: pointer;
 	transition: .5s;
 }
 
-/* Efecto al presionar el bot√≥n de la notificaci√≥n */
+/* Efecto al presionar el botÛn de la notificaciÛn */
 .nBtn:active {
 	top: 118px;
 	left: calc(25% + 2px);
@@ -78,7 +85,7 @@ body {
 	left: 4px;
 }
 
-/* Bloques de informaci√≥n de ganancia (Apuesta, Ganancia, Pago) */
+/* Bloques de informaciÛn de ganancia (Apuesta, Ganancia, Pago) */
 .nsWinBlock {
 	display: inline-block;
 	font-size: 21px;
@@ -88,7 +95,7 @@ body {
 	padding-right: 40px;
 }
 
-/* --- FIN DE SECCI√ìN DE NOTIFICACIONES --- */
+/* --- FIN DE SECCI”N DE NOTIFICACIONES --- */
 
 /* --- TABLERO DE APUESTAS --- */
 /* Contenedor principal del tablero de apuestas */
@@ -114,12 +121,12 @@ body {
 	font-weight: bold;
 }
 
-/* Contenedor para los n√∫meros individuales en el tablero */
+/* Contenedor para los n˙meros individuales en el tablero */
 .number_board {
 	margin-left: 1px;
 }
 
-/* Estilo para cada bloque de n√∫mero individual */
+/* Estilo para cada bloque de n˙mero individual */
 .number_block {
 	width: 39.94px;
 	border: 1px solid;
@@ -129,7 +136,7 @@ body {
 	padding: 32px 0px;
 }
 
-/* Estilo para el texto del n√∫mero, rotado verticalmente */
+/* Estilo para el texto del n˙mero, rotado verticalmente */
 .nbn {
 	font-size: 20px;
 	font-weight: bold;
@@ -167,7 +174,7 @@ body {
 	margin-left: -1.98px;
 }
 
-/* Estilo espec√≠fico para el bloque del n√∫mero 0 */
+/* Estilo especÌfico para el bloque del n˙mero 0 */
 .number_0 {
 	position: absolute;
 	border: 2px solid;
@@ -188,8 +195,8 @@ body {
 	margin-top: -89.75px;
 }
 
-/* --- L√çNEAS DE APUESTA (CAPAS INVISIBLES PARA CLICS) --- */
-/* Contenedor para todas las l√≠neas de apuesta (split, street, corner, etc.) */
+/* --- LÕNEAS DE APUESTA (CAPAS INVISIBLES PARA CLICS) --- */
+/* Contenedor para todas las lÌneas de apuesta (split, street, corner, etc.) */
 .winning_lines {
 	position: absolute;
 	margin-top: -137px;
@@ -197,7 +204,7 @@ body {
 	height: 0;
 }
 
-/* L√≠neas de apuesta horizontales (entre filas de n√∫meros) */
+/* LÌneas de apuesta horizontales (entre filas de n˙meros) */
 .wlttb {
 	position: relative;
 	width: 100%;
@@ -206,7 +213,7 @@ body {
 	top: 269px;
 }
 
-/* Posicionamiento espec√≠fico para diferentes l√≠neas horizontales */
+/* Posicionamiento especÌfico para diferentes lÌneas horizontales */
 #wlttb_top {
 	position: absolute;
 	margin-top: -89px;
@@ -218,7 +225,7 @@ body {
 	margin-top: 79px;
 }
 
-/* L√≠neas de apuesta verticales (entre n√∫meros) */
+/* LÌneas de apuesta verticales (entre n˙meros) */
 .wlrtl {
 	position: relative;
 	display: inline-block;
@@ -228,7 +235,7 @@ body {
 	margin-left: 37px;
 }
 
-/* Ajustes de posici√≥n para l√≠neas verticales espec√≠ficas */
+/* Ajustes de posiciÛn para lÌneas verticales especÌficas */
 #wlrtl_2,
 #wlrtl_3,
 #wlrtl_6,
@@ -245,7 +252,7 @@ body {
 	margin-left: 32px;
 }
 
-/* Contenedor para las √°reas de clic de apuestas de esquina (corner bets) */
+/* Contenedor para las ·reas de clic de apuestas de esquina (corner bets) */
 .wlcb {
 	position: absolute;
 	width: 477px;
@@ -269,7 +276,7 @@ body {
 	cursor: pointer;
 }
 
-/* Ajustes de posici√≥n para bloques de esquina espec√≠ficos */
+/* Ajustes de posiciÛn para bloques de esquina especÌficos */
 #cbbb_1,
 #cbbb_4,
 #cbbb_5,
@@ -328,34 +335,34 @@ body {
 	margin-top: 42px;
 }
 
-/* --- FIN DE L√çNEAS DE APUESTA --- */
+/* --- FIN DE LÕNEAS DE APUESTA --- */
 
-/* Estilo del bot√≥n "SPIN" */
+/* Estilo del botÛn "SPIN" */
 .spinBtn {
 	position: absolute;
 	margin-top: 329px;
 	margin-left: -392px;
 	font-size: 15px;
 	cursor: pointer;
-	background-color: #ffec00;
+	background-color: #ab925c;
 	padding: 10px 5px;
 	border-radius: 100%;
-	color: #000;
+	color: #202020;
 	font-weight: bold;
 }
 
-/* Clases de color para los n√∫meros */
+/* Clases de color para los n˙meros */
 .redNum {
 	background-color: #E0080B;
 }
 
 .blackNum {
-	background-color: #000;
+	background-color: #ab925c;
 }
 
-/* --- SECCI√ìN DE FICHAS Y BANCO --- */
+/* --- SECCI”N DE FICHAS Y BANCO --- */
 
-/* Contenedor para la selecci√≥n de fichas y el √°rea del banco/apuesta */
+/* Contenedor para la selecciÛn de fichas y el ·rea del banco/apuesta */
 .chipDeck,
 .bankContainer {
 	position: absolute;
@@ -369,25 +376,25 @@ body {
 	box-shadow: inset -2px -4px rgb(0 0 0 / 20%);
 }
 
-/* Posicionamiento espec√≠fico para el contenedor del banco */
+/* Posicionamiento especÌfico para el contenedor del banco */
 .bankContainer {
 	margin-top: -21px;
 }
 
-/* Estilo de una ficha individual en el √°rea de selecci√≥n */
+/* Estilo de una ficha individual en el ·rea de selecciÛn */
 .cdChip {
 	width: 27px;
 	height: 27px;
-	background-color: #fff;
+	background-color: #202020;
 	border: 5px solid;
 	border-radius: 100%;
 	display: inline-block;
 	margin-left: 9px;
-	color: #000;
+	color: #ab925c;
 	cursor: pointer;
 }
 
-/* Estilo para el valor num√©rico dentro de una ficha */
+/* Estilo para el valor numÈrico dentro de una ficha */
 .cdChipSpan {
 	display: inherit;
 	position: relative;
@@ -405,11 +412,11 @@ body {
 	box-shadow: 0 4px rgb(0 0 0 / 20%);
 }
 
-/* Estilo para el bot√≥n "clear" que parece una ficha */
+/* Estilo para el botÛn "clear" que parece una ficha */
 .clearBet {
 	border-color: red;
 	background-color: red;
-	color: #fff;
+	color: #ab925c;
 	margin-left: 22px;
 }
 
@@ -422,16 +429,17 @@ body {
 .bet {
 	display: inline-block;
 	width: calc(50% - 28px);
-	background-color: #000;
+	background-color: #ab925c;
 	font-size: 18px;
 	margin-left: 7px;
 	padding: 5px;
-	border: 4px solid silver;
+	border: 4px solid #ab925c;
 	border-radius: 7px;
+	color: #ab925c;
 	text-align: right;
 }
 
-/* Contenedor para el historial de n√∫meros ganadores */
+/* Contenedor para el historial de n˙meros ganadores */
 .pnBlock {
 	position: absolute;
 	border: 1px solid;
@@ -441,21 +449,21 @@ body {
 	margin-left: -1px;
 }
 
-/* Contenido desplazable dentro del historial de n√∫meros */
+/* Contenido desplazable dentro del historial de n˙meros */
 #pnContent {
-	border: 4px solid #d5b714;
+	border: 4px solid #ab925c;
 	width: 485px;
 	height: 31px;
 	position: relative;
 	display: block;
 	margin-left: 4px;
 	margin-top: 3px;
-	background-color: #fff;
-	color: #000;
+	background-color: #202020;
+	color: #ab925c;
 	overflow: hidden;
 }
 
-/* Estilos para los n√∫meros en el historial seg√∫n su color */
+/* Estilos para los n˙meros en el historial seg˙n su color */
 .pnRed,
 .pnBlack,
 .pnGreen {
@@ -475,13 +483,13 @@ body {
 }
 
 .pnGreen {
-	color: green;
+	color: #ab925c;
 }
 
 /* --- FIN DE TABLERO DE APUESTAS --- */
 
 /* --- ANIMACIONES Y RULETA --- */
-/* Animaci√≥n para la rotaci√≥n continua de la ruleta */
+/* AnimaciÛn para la rotaciÛn continua de la ruleta */
 @keyframes wheelRotate {
 	from {
 		transform: rotate(0deg);
@@ -492,7 +500,7 @@ body {
 	}
 }
 
-/* Animaci√≥n para la rotaci√≥n de la bola */
+/* AnimaciÛn para la rotaciÛn de la bola */
 @keyframes ballRotate {
 	from {
 		transform: rotate(0deg);
@@ -526,7 +534,7 @@ body {
 
 /* La bola */
 .ball {
-	background-color: #fff;
+	background-color: #202020;
 	width: 16px;
 	height: 16px;
 	border-radius: 100%;
@@ -538,7 +546,7 @@ body {
 /* Torreta central decorativa de la ruleta */
 .turret {
 	border-radius: 100%;
-	background: radial-gradient(circle at 30% 30%, #f3c620, #1a1608);
+	background: radial-gradient(circle at 30% 30%, #ab925c, #1a1608);
 	width: 45px;
 	height: 45px;
 	position: absolute;
@@ -549,7 +557,7 @@ body {
 
 /* Mango de la torreta */
 .turretHandle {
-	background: radial-gradient(circle at 44%, #f3c620, #6a570f);
+	background: radial-gradient(circle at 44%, #ab925c, #6a570f);
 	width: 87px;
 	height: 14px;
 	position: absolute;
@@ -561,7 +569,7 @@ body {
 .thendOne,
 .thendTwo {
 	border-radius: 100%;
-	background: radial-gradient(circle at 30% 30%, #f3c620, #1a1608);
+	background: radial-gradient(circle at 30% 30%, #ab925c, #1a1608);
 	width: 25px;
 	height: 25px;
 	position: absolute;
@@ -586,10 +594,10 @@ body {
 	height: 290px;
 	border-radius: 100%;
 	box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
-	border: 10px solid #F3c620;
+	border: 10px solid #ab925c;
 }
 
-/* Bloque usado para crear una cu√±a de color en la ruleta. Se rota y se recorta. */
+/* Bloque usado para crear una cuÒa de color en la ruleta. Se rota y se recorta. */
 .block {
 	transition: all 1s;
 	position: absolute;
@@ -599,7 +607,7 @@ body {
 	clip: rect(0px, 145px, 290px, 0px);
 }
 
-/* Sector que contiene un n√∫mero y una cu√±a de color. Se rota para posicionar cada n√∫mero. */
+/* Sector que contiene un n˙mero y una cuÒa de color. Se rota para posicionar cada n˙mero. */
 .sect {
 	position: absolute;
 	top: 10px;
@@ -610,12 +618,12 @@ body {
 	clip: rect(0px, 290px, 290px, 145px);
 }
 
-/* Estilos para los n√∫meros en la ruleta (para n√∫meros de 1 o 2 d√≠gitos) */
+/* Estilos para los n˙meros en la ruleta (para n˙meros de 1 o 2 dÌgitos) */
 .double,
 .single {
 	position: absolute;
 	z-index: 1;
-	color: #fff;
+	color: #ab925c;
 	font-size: 14px;
 	transform: rotate(3deg);
 }
@@ -630,10 +638,10 @@ body {
 	margin-top: 4.5px;
 }
 
-/* --- DEFINICI√ìN DE COLORES Y POSICIONES DE LOS SECTORES --- */
+/* --- DEFINICI”N DE COLORES Y POSICIONES DE LOS SECTORES --- */
 /* El sector 1 es el 0 (verde) */
 #sect1 .block {
-	background-color: #016D29;
+	background-color: #202020;
 	transform: rotate(9.73deg);
 }
 
@@ -679,11 +687,11 @@ body {
 #sect33 .block,
 #sect35 .block,
 #sect37 .block {
-	background-color: #000;
+	background-color: #ab925c;
 	transform: rotate(9.73deg);
 }
 
-/* Rotaci√≥n de cada sector para ubicarlo en su posici√≥n correcta en la ruleta (360 / 37 ‚âà 9.73 grados por sector) */
+/* RotaciÛn de cada sector para ubicarlo en su posiciÛn correcta en la ruleta (360 / 37 ò 9.73 grados por sector) */
 #sect2 {
 	transform: rotate(9.73deg);
 }
@@ -828,19 +836,19 @@ body {
 	transform: rotate(350.28deg);
 }
 
-/* C√≠rculo interior oscuro que simula los "bolsillos" donde cae la bola */
+/* CÌrculo interior oscuro que simula los "bolsillos" donde cae la bola */
 .pockets {
 	position: absolute;
 	top: 37px;
 	left: 37px;
 	width: 235px;
 	height: 235px;
-	background-color: #000;
+	background-color: #ab925c;
 	border-radius: 100%;
 	opacity: .5;
 }
 
-/* Borde plateado alrededor del √°rea de los bolsillos */
+/* Borde plateado alrededor del ·rea de los bolsillos */
 .pocketsRim {
 	position: absolute;
 	top: 34px;
@@ -848,7 +856,7 @@ body {
 	width: 235px;
 	height: 235px;
 	border-radius: 100%;
-	border: 3px solid silver;
+	border: 3px solid #ab925c;
 }
 
 /* Cono central decorativo de la ruleta */
@@ -870,14 +878,14 @@ body {
 .chip {
 	width: 21px;
 	height: 21px;
-	background-color: #fff;
+	background-color: #202020;
 	border: 3px solid;
 	border-radius: 100%;
 	position: absolute;
 }
 
 .chipSpan {
-	color: #000;
+	color: #ab925c;
 	font-weight: bold;
 	font-size: 11px;
 	position: relative;
@@ -886,7 +894,7 @@ body {
 	top: 4px;
 }
 
-/* Colores de borde para las fichas seg√∫n su valor */
+/* Colores de borde para las fichas seg˙n su valor */
 .gold {
 	border-color: gold;
 }
@@ -915,7 +923,7 @@ only screen and (max-height: 550px) {
 		align-items: center;
 		justify-content: center;
 		height: 100vh;
-		background-color: #016D29;
+		background-color: #202020;
 	}
 
 	#container {
