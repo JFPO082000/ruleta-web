@@ -534,7 +534,7 @@ body {
 
 /* La bola */
 .ball {
-	background-color: #000000;
+	background-color: #fff;
 	width: 16px;
 	height: 16px;
 	border-radius: 100%;
@@ -843,7 +843,7 @@ body {
 	left: 37px;
 	width: 235px;
 	height: 235px;
-	background-color: #fff;
+	background-color: #000;
 	border-radius: 100%;
 	opacity: .5;
 }
