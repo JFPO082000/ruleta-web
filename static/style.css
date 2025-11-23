@@ -360,6 +360,10 @@ body {
 	background-color: #000;
 }
 
+.greenNum {
+	background-color: #04750d;
+}
+
 /* --- SECCI�N DE FICHAS Y BANCO --- */
 
 /* Contenedor para la selecci�n de fichas y el �rea del banco/apuesta */
