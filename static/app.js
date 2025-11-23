@@ -40,12 +40,12 @@ function gameOver() {
 	notification.setAttribute('id', 'notification');
 	let nSpan = document.createElement('span');
 	nSpan.setAttribute('class', 'nSpan');
-	nSpan.innerText = 'Bankrupt';
+	nSpan.innerText = 'Bancarrota';
 	notification.append(nSpan);
 
 	let nBtn = document.createElement('div');
 	nBtn.setAttribute('class', 'nBtn');
-	nBtn.innerText = 'Play again';
+	nBtn.innerText = 'Jugar de nuevo';
 	nBtn.onclick = function () {
 		resetGame();
 	};
