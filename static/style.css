@@ -357,7 +357,7 @@ body {
 }
 
 .blackNum {
-	background-color: #fff;
+	background-color: #000;
 }
 
 /* --- SECCI�N DE FICHAS Y BANCO --- */
@@ -458,7 +458,7 @@ body {
 	display: block;
 	margin-left: 4px;
 	margin-top: 3px;
-	background-color: #000;
+	background-color: #ffffff;
 	color: #000;
 	overflow: hidden;
 }
@@ -483,7 +483,7 @@ body {
 }
 
 .pnGreen {
-	color: black;
+	color: #04750d;
 }
 
 /* --- FIN DE TABLERO DE APUESTAS --- */
@@ -534,7 +534,7 @@ body {
 
 /* La bola */
 .ball {
-	background-color: #ab925c;
+	background-color: #000000;
 	width: 16px;
 	height: 16px;
 	border-radius: 100%;
@@ -641,7 +641,7 @@ body {
 /* --- DEFINICI�N DE COLORES Y POSICIONES DE LOS SECTORES --- */
 /* El sector 1 es el 0 (verde) */
 #sect1 .block {
-	background-color: #000;
+	background-color: #04750d;
 	transform: rotate(9.73deg);
 }
 
