@@ -627,7 +627,7 @@ body {
 .single {
 	position: absolute;
 	z-index: 1;
-	color: #ab925c;
+	color: #fff;
 	font-size: 14px;
 	transform: rotate(3deg);
 }

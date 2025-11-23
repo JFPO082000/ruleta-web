@@ -272,7 +272,7 @@ function buildBettingBoard() {
 	numberBoard.setAttribute('class', 'number_board');
 
 	let zero = document.createElement('div');
-	zero.setAttribute('class', 'number_0');
+	zero.setAttribute('class', 'number_0 greenNum');
 	var objType = 'zero';
 	var odds = 35;
 	zero.onclick = function () {
@@ -292,7 +292,7 @@ function buildBettingBoard() {
 	var redBlocks = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
 	for (i = 0; i < numberBlocks.length; i++) {
 		let a = i;
-		var nbClass = (numberBlocks[i] == '2 to 1') ? 'tt1_block' : 'number_block';
+		var nbClass = (numberBlocks[i] == '2 to 1') ? 'tt1_block greenNum' : 'number_block';
 		var colourClass = (redBlocks.includes(numberBlocks[i])) ? ' redNum' : ((nbClass == 'number_block') ? ' blackNum' : '');
 		var numberBlock = document.createElement('div');
 		numberBlock.setAttribute('class', nbClass + colourClass);
@@ -327,7 +327,7 @@ function buildBettingBoard() {
 	for (i = 0; i < bo3Blocks.length; i++) {
 		let b = i;
 		var bo3Block = document.createElement('div');
-		bo3Block.setAttribute('class', 'bo3_block');
+		bo3Block.setAttribute('class', 'bo3_block greenNum');
 		bo3Block.onclick = function () {
 			num = (b == 0) ? '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12' : ((b == 1) ? '13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24' : '25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36');
 			setBet(this, num, 'outside_dozen', 2);
@@ -347,7 +347,7 @@ function buildBettingBoard() {
 	let otoBlocks = ['EVEN', 'RED', 'BLACK', 'ODD'];
 	for (i = 0; i < otoBlocks.length; i++) {
 		let d = i;
-		var colourClass = (otoBlocks[i] == 'RED') ? ' redNum' : ((otoBlocks[i] == 'BLACK') ? ' blackNum' : '');
+		var colourClass = (otoBlocks[i] == 'RED') ? ' redNum' : ((otoBlocks[i] == 'BLACK') ? ' blackNum' : ((otoBlocks[i] == 'EVEN' || otoBlocks[i] == 'ODD') ? ' greenNum' : ''));
 		var otoBlock = document.createElement('div');
 		otoBlock.setAttribute('class', 'oto_block' + colourClass);
 		otoBlock.onclick = function () {
