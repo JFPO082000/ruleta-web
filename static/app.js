@@ -496,44 +496,71 @@ function setBet(e, n, t, o) {
 	}
 }
 
-function spin() {
-	var winningSpin = Math.floor(Math.random() * 37);
-	spinWheel(winningSpin);
-	setTimeout(function () {
-		if (numbersBet.includes(winningSpin)) {
-			let winValue = 0;
-			let betTotal = 0;
-			for (i = 0; i < bet.length; i++) {
-				var numArray = bet[i].numbers.split(',').map(Number);
-				if (numArray.includes(winningSpin)) {
-					bankValue = (bankValue + (bet[i].odds * bet[i].amt) + bet[i].amt);
-					winValue = winValue + (bet[i].odds * bet[i].amt);
-					betTotal = betTotal + bet[i].amt;
-				}
+async function spin() {
+	try {
+		// Llamar al backend para calcular el spin
+		const response = await fetch('/api/spin', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include', // Enviar cookies automáticamente
+			body: JSON.stringify({
+				balance: bankValue,
+				currentBet: currentBet,
+				bets: bet,
+				numbersBet: numbersBet
+			})
+		});
+
+		if (!response.ok) {
+			const error = await response.json();
+			alert(error.detail || 'Error en el servidor');
+			return;
+		}
+
+		const data = await response.json();
+		const winningSpin = data.winningSpin;
+		const winValue = data.winValue;
+		const newBalance = data.newBalance;
+
+		// Animar la ruleta con el número ganador
+		spinWheel(winningSpin);
+
+		setTimeout(function () {
+			// Actualizar saldo con el valor del servidor
+			bankValue = newBalance;
+
+			// Mostrar notificación de victoria si ganó
+			if (winValue > 0) {
+				let betTotal = currentBet;
+				win(winningSpin, winValue, betTotal);
 			}
-			win(winningSpin, winValue, betTotal);
-		}
 
-		currentBet = 0;
-		document.getElementById('bankSpan').innerText = '' + bankValue.toLocaleString("en-GB") + '';
-		document.getElementById('betSpan').innerText = '' + currentBet.toLocaleString("en-GB") + '';
+			currentBet = 0;
+			document.getElementById('bankSpan').innerText = '' + bankValue.toLocaleString("en-GB") + '';
+			document.getElementById('betSpan').innerText = '' + currentBet.toLocaleString("en-GB") + '';
 
-		let pnClass = (numRed.includes(winningSpin)) ? 'pnRed' : ((winningSpin == 0) ? 'pnGreen' : 'pnBlack');
-		let pnContent = document.getElementById('pnContent');
-		let pnSpan = document.createElement('span');
-		pnSpan.setAttribute('class', pnClass);
-		pnSpan.innerText = winningSpin;
-		pnContent.append(pnSpan);
-		pnContent.scrollLeft = pnContent.scrollWidth;
+			let pnClass = (numRed.includes(winningSpin)) ? 'pnRed' : ((winningSpin == 0) ? 'pnGreen' : 'pnBlack');
+			let pnContent = document.getElementById('pnContent');
+			let pnSpan = document.createElement('span');
+			pnSpan.setAttribute('class', pnClass);
+			pnSpan.innerText = winningSpin;
+			pnContent.append(pnSpan);
+			pnContent.scrollLeft = pnContent.scrollWidth;
 
-		bet = [];
-		numbersBet = [];
-		removeChips();
-		wager = lastWager;
-		if (bankValue == 0 && currentBet == 0) {
-			gameOver();
-		}
-	}, 10000);
+			bet = [];
+			numbersBet = [];
+			removeChips();
+			wager = lastWager;
+			if (bankValue == 0 && currentBet == 0) {
+				gameOver();
+			}
+		}, 10000);
+	} catch (error) {
+		console.error('Error en spin:', error);
+		alert('Error de conexión con el servidor');
+	}
 }
 
 function win(winningSpin, winValue, betTotal) {
