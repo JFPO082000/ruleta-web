@@ -498,6 +498,9 @@ function setBet(e, n, t, o) {
 
 async function spin() {
 	try {
+		// Capturar apuesta actual antes de cualquier cambio
+		let spinBet = currentBet;
+
 		// Llamar al backend para calcular el spin
 		const response = await fetch('/api/spin', {
 			method: 'POST',
@@ -507,7 +510,7 @@ async function spin() {
 			credentials: 'include', // Enviar cookies automáticamente
 			body: JSON.stringify({
 				balance: bankValue,
-				currentBet: currentBet,
+				currentBet: spinBet,
 				bets: bet,
 				numbersBet: numbersBet
 			})
@@ -531,10 +534,11 @@ async function spin() {
 			// Actualizar saldo con el valor del servidor
 			bankValue = newBalance;
 
-			// Mostrar notificación de victoria si ganó
+			// Mostrar notificación de victoria o derrota
 			if (winValue > 0) {
-				let betTotal = currentBet;
-				win(winningSpin, winValue, betTotal);
+				win(winningSpin, winValue, spinBet);
+			} else {
+				lose(winningSpin, spinBet);
 			}
 
 			currentBet = 0;
@@ -603,6 +607,46 @@ function win(winningSpin, winValue, betTotal) {
 			notification.remove();
 		}, 4000);
 	}
+}
+
+function lose(winningSpin, betTotal) {
+	let notification = document.createElement('div');
+	notification.setAttribute('id', 'notification');
+	let nSpan = document.createElement('div');
+	nSpan.setAttribute('class', 'nSpan');
+	let nsnumber = document.createElement('span');
+	nsnumber.setAttribute('class', 'nsnumber');
+	nsnumber.style.cssText = (numRed.includes(winningSpin)) ? 'color:red' : 'color:black';
+	nsnumber.innerText = winningSpin;
+	nSpan.append(nsnumber);
+	let nsTxt = document.createElement('span');
+	nsTxt.innerText = ' Lose';
+	nSpan.append(nsTxt);
+	let nsWin = document.createElement('div');
+	nsWin.setAttribute('class', 'nsWin');
+	let nsWinBlock = document.createElement('div');
+	nsWinBlock.setAttribute('class', 'nsWinBlock');
+	nsWinBlock.innerText = 'Bet: ' + betTotal;
+	nSpan.append(nsWinBlock);
+	nsWin.append(nsWinBlock);
+	nsWinBlock = document.createElement('div');
+	nsWinBlock.setAttribute('class', 'nsWinBlock');
+	nsWinBlock.innerText = 'Win: 0';
+	nSpan.append(nsWinBlock);
+	nsWin.append(nsWinBlock);
+	nsWinBlock = document.createElement('div');
+	nsWinBlock.setAttribute('class', 'nsWinBlock');
+	nsWinBlock.innerText = 'Loss: ' + betTotal;
+	nsWin.append(nsWinBlock);
+	nSpan.append(nsWin);
+	notification.append(nSpan);
+	container.prepend(notification);
+	setTimeout(function () {
+		notification.style.cssText = 'opacity:0';
+	}, 3000);
+	setTimeout(function () {
+		notification.remove();
+	}, 4000);
 }
 
 function removeBet(e, n, t, o) {
