@@ -31,103 +31,24 @@
 </head>
 
 <body>
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" style="display:none;">
+        <div class="modal-content">
+            <h2>Iniciar Sesión</h2>
+            <input type="email" id="loginEmail" placeholder="Correo electrónico">
+            <input type="password" id="loginPassword" placeholder="Contraseña">
+            <div id="loginError" style="color: red; margin-top: 10px; display: none;"></div>
+            <button onclick="submitLogin()">Entrar</button>
+        </div>
+    </div>
+
 	<script>
 		// Disable right-click context menu
 		document.addEventListener('contextmenu', function(e) {
-			e.preventDefault();
 			return false;
 		});
 
 		// Disable text selection
-		document.addEventListener('selectstart', function(e) {
-			e.preventDefault();
-			return false;
-		});
-
-		// Disable copy
-		document.addEventListener('copy', function(e) {
-			e.preventDefault();
-			return false;
-		});
-
-		// Disable cut
-		document.addEventListener('cut', function(e) {
-			e.preventDefault();
-			return false;
-		});
-
-		// Disable paste
-		document.addEventListener('paste', function(e) {
-			e.preventDefault();
-			return false;
-		});
-
-		// Disable drag
-		document.addEventListener('drag', function(e) {
-			e.preventDefault();
-			return false;
-		});
-
-		document.addEventListener('dragstart', function(e) {
-			e.preventDefault();
-			return false;
-		});
-
-		// Disable keyboard shortcuts for developer tools
-		document.addEventListener('keydown', function(e) {
-			// F12 - Developer Tools
-			if (e.keyCode === 123) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+Shift+I - Developer Tools
-			if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+Shift+J - Console
-			if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+U - View Source
-			if (e.ctrlKey && e.keyCode === 85) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+S - Save Page
-			if (e.ctrlKey && e.keyCode === 83) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+Shift+C - Inspect Element
-			if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+C - Copy
-			if (e.ctrlKey && e.keyCode === 67) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+X - Cut
-			if (e.ctrlKey && e.keyCode === 88) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+V - Paste
-			if (e.ctrlKey && e.keyCode === 86) {
-				e.preventDefault();
-				return false;
-			}
-			// Ctrl+A - Select All
-			if (e.ctrlKey && e.keyCode === 65) {
-				e.preventDefault();
-				return false;
-			}
-		});
-
-		// Disable mouse selection
 		document.onselectstart = function() {
 			return false;
 		};
