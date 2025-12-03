@@ -521,7 +521,6 @@ body {
 		transform: rotate(-359deg);
 	}
 
-	animation-fill-mode: forwards;
 }
 
 /* Contenedor principal de la ruleta */

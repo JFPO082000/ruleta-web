@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>Javascript Roulette</title>
 	<meta name="title" content="Javascript Roulette">
 	<meta name="description" content="A fully functioning roulette game made using Javascript and CSS">
@@ -18,38 +19,37 @@
 			user-select: none;
 			-webkit-touch-callout: none;
 		}
-		
+
 		/* Prevent dragging */
 		* {
 			-webkit-user-drag: none;
 			-khtml-user-drag: none;
 			-moz-user-drag: none;
 			-o-user-drag: none;
-			user-drag: none;
 		}
 	</style>
 </head>
 
 <body>
-    <!-- LOGIN MODAL -->
-    <div id="loginModal" style="display:none;">
-        <div class="modal-content">
-            <h2>Iniciar Sesión</h2>
-            <input type="email" id="loginEmail" placeholder="Correo electrónico">
-            <input type="password" id="loginPassword" placeholder="Contraseña">
-            <div id="loginError" style="color: red; margin-top: 10px; display: none;"></div>
-            <button onclick="submitLogin()">Entrar</button>
-        </div>
-    </div>
+	<!-- LOGIN MODAL -->
+	<div id="loginModal" style="display:none;">
+		<div class="modal-content">
+			<h2>Iniciar Sesión</h2>
+			<input type="email" id="loginEmail" placeholder="Correo electrónico">
+			<input type="password" id="loginPassword" placeholder="Contraseña">
+			<div id="loginError" style="color: red; margin-top: 10px; display: none;"></div>
+			<button onclick="submitLogin()">Entrar</button>
+		</div>
+	</div>
 
 	<script>
 		// Disable right-click context menu
-		document.addEventListener('contextmenu', function(e) {
+		document.addEventListener('contextmenu', function (e) {
 			return false;
 		});
 
 		// Disable text selection
-		document.onselectstart = function() {
+		document.onselectstart = function () {
 			return false;
 		};
 	</script>
