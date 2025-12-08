@@ -139,6 +139,22 @@ def get_saldo(current_user: Usuario = Depends(get_current_user), db: Session = D
         }
     )
 
+@app.get("/api/user/{user_id}")
+def get_user_balance_by_id(user_id: int, db: Session = Depends(get_db)):
+    """
+    Obtener saldo de un usuario específico por ID (para integración simple).
+    Devuelve JSON { "saldo": float }.
+    """
+    saldo = db.query(Saldo).filter(Saldo.id_usuario == user_id).first()
+    
+    if not saldo:
+        # Si no existe saldo, retornamos 0 o un error, 
+        # pero para el juego quizas sea mejor devolver 0 si el usuario existe.
+        # Por ahora, si no hay registro de saldo, asumimos 0.
+        return {"saldo": 0.0}
+    
+    return {"saldo": float(saldo.saldo_actual)}
+
 # ========== ENDPOINTS DE LA RULETA ==========
 
 @app.get("/")
