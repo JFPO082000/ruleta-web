@@ -71,6 +71,8 @@ function resetGame() {
 function startGame() {
 	buildWheel();
 	buildBettingBoard();
+	// Mount container to DOM
+	document.body.appendChild(container);
 }
 
 function gameOver() {

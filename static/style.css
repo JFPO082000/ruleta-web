@@ -1,7 +1,8 @@
-/* --- ESCAL ADO GLOBAL PARA REDUCIR TAMA�O --- */
+/* --- ESTILOS GENERALES --- */
 body {
-	transform: scale(0.70);
-	transform-origin: top center;
+	/* Scale removed for better visibility */
+	margin: 0;
+	padding: 0;
 }
 
 /* --- ESTILOS GENERALES --- */
@@ -948,17 +949,7 @@ only screen and (max-height: 550px) {
 	}
 }
 
-.red {
-	border-color: red;
-}
-
-.orange {
-	border-color: orange;
-}
-
-.blue {
-	border-color: blue;
-}
+/* Duplicate color classes removed - see lines 907-917 for main definitions */
 
 /* --- POSICIONAMIENTO DE LAS FICHAS EN EL TABLERO --- */
 .tt1_block .chip {
