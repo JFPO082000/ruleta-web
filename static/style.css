@@ -1,8 +1,7 @@
-/* --- ESTILOS GENERALES --- */
+/* --- ESCAL ADO GLOBAL PARA REDUCIR TAMA�O --- */
 body {
-	/* Scale removed for better visibility */
-	margin: 0;
-	padding: 0;
+	transform: scale(0.70);
+	transform-origin: top center;
 }
 
 /* --- ESTILOS GENERALES --- */
@@ -522,6 +521,7 @@ body {
 		transform: rotate(-359deg);
 	}
 
+	animation-fill-mode: forwards;
 }
 
 /* Contenedor principal de la ruleta */
@@ -949,7 +949,17 @@ only screen and (max-height: 550px) {
 	}
 }
 
-/* Duplicate color classes removed - see lines 907-917 for main definitions */
+.red {
+	border-color: red;
+}
+
+.orange {
+	border-color: orange;
+}
+
+.blue {
+	border-color: blue;
+}
 
 /* --- POSICIONAMIENTO DE LAS FICHAS EN EL TABLERO --- */
 .tt1_block .chip {
@@ -1003,4 +1013,3 @@ only screen and (max-height: 550px) {
 }
 
 /* --- FIN DE ESTILOS DE FICHAS --- */
-

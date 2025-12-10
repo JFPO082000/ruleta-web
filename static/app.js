@@ -10,54 +10,16 @@ let numRed = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
 let wheelnumbersAC = [0, 26, 3, 35, 12, 28, 7, 29, 18, 22, 9, 31, 14, 20, 1, 33, 16, 24, 5, 10, 23, 8, 30, 11, 36, 13, 27, 6, 34, 17, 25, 2, 21, 4, 19, 15, 32];
 
 let container = document.createElement('div');
+container.setAttribute('id', 'container');
+document.body.append(container);
+
 let wheel;
 let ballTrack;
 
 startGame();
 
-// MODIFICACIÓN: Integración de saldo de usuario real
-const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('user_id');
-// Obtenemos la URL del backend si viene como parámetro (para app mobile/externa)
-// Si no viene, asumimos string vacío (ruta relativa)
-const backendUrl = urlParams.get('api_url') || '';
-
-if (userId) {
-	console.log("Detectado user_id:", userId);
-	console.log("Backend URL:", backendUrl || "(local)");
-
-	fetch(`${backendUrl}/api/user/${userId}`)
-		.then(response => response.json())
-		.then(data => {
-			if (data.saldo !== undefined) {
-				console.log("Saldo del usuario (BD):", data.saldo);
-				bankValue = data.saldo; // Actualiza variable global
-
-				// Actualiza UI si ya existe
-				let bankSpan = document.getElementById('bankSpan');
-				if (bankSpan) {
-					bankSpan.innerText = bankValue.toLocaleString("en-GB");
-				}
-			}
-		})
-		.catch(error => console.error("Error obteniendo saldo:", error));
-}
-
 function resetGame() {
-	if (!userId) {
-		bankValue = 1000;
-	} else {
-		// Opción: Recargar saldo de la BD para asegurar consistencia
-		fetch(`${backendUrl}/api/user/${userId}`)
-			.then(r => r.json())
-			.then(d => {
-				if (d.saldo !== undefined) {
-					bankValue = d.saldo;
-					let bankSpan = document.getElementById('bankSpan');
-					if (bankSpan) bankSpan.innerText = bankValue.toLocaleString("en-GB");
-				}
-			});
-	}
+	bankValue = 1000;
 	currentBet = 0;
 	wager = 5;
 	bet = [];
@@ -71,8 +33,6 @@ function resetGame() {
 function startGame() {
 	buildWheel();
 	buildBettingBoard();
-	// Mount container to DOM
-	document.body.appendChild(container);
 }
 
 function gameOver() {
